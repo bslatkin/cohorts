@@ -1,9 +1,6 @@
-html, body {
-  height: 100%;
-  width: 100%;
-}
-
 #viz_container {
   min-width: 600px;
-  height: 300px;
+}
+.chart-cell {
+  height: 400px;
 }

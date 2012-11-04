@@ -3,8 +3,76 @@ var GROUP_VALUE_COLUMN = 1;
 var DAY_COLUMN = 2;
 
 
-function getChartCount() {
-  return $('#viz_titles').children().size();
+function createGroupTypeRadios(groupTypes) {
+  var vizDiv = $('#viz_group_type1');
+  vizDiv.empty();
+  vizDiv.append($('<span>').text('Group types'));
+
+  // Guess that whichever group type has only one value and that value is
+  // empty will be the topline data.
+  var checkedType = null;
+  $.each(groupTypes, function(key, value) {
+    if (value.length == 1 && value[0] === '') {
+      checkedType = key;
+    }
+  });
+
+  var i = 0;
+  $.each(groupTypes, function(key, value) {
+    var radioId = 'group_type_radio1_' + (i++);
+    var useRadio = $('<input type="radio">')
+        .addClass('group-type-radio')
+        .attr('id', radioId)
+        .attr('name', 'chart1')
+        .attr('value', key);
+
+    // Select the default group type.
+    if (!!checkedType && checkedType === key) {
+      useRadio.attr('checked', 'checked');
+    }
+
+    var container = $('<div>');
+    container.append(useRadio);
+    container.append($('<label>').attr('for', radioId).text(key));
+
+    vizDiv.append(container);
+  });
+
+  // Update event handlers
+  $('.group-type-radio').click(
+      function() { createGroupValueCheckboxes(groupTypes); });
+
+  // TODO Update the visualization
+}
+
+
+function createGroupValueCheckboxes(groupTypes) {
+  console.log('here!');
+  var type = $('input:radio[name=\'chart1\']:checked').val();
+  var values = groupTypes[type];
+  if (!values) {
+    $.error('Bad group type: ' + type);
+  }
+
+  var valuesDiv = $('#viz_group_value1');
+  valuesDiv.empty();
+
+  // Special case for group types that only have a single, empty value.
+  if (values.length == 1 && values[0] === '') {
+    return;
+  }
+
+  valuesDiv.append($('<span>').text('Group values'));
+
+
+  var i = 0;
+  $.each(values, function(key, value) {
+    var checkboxId = 'group_value_checkbox1_' + (i++);
+    var container = $('<div>');
+    container.append($('<input type="checkbox">').attr('id', checkboxId));
+    container.append($('<label>').attr('for', checkboxId).text(value));
+    valuesDiv.append(container);
+  });
 }
 
 
@@ -31,59 +99,6 @@ function extractGroupTypes(csvData) {
 }
 
 
-function createGroupTypeRadios(groupTypes) {
-  var vizDiv = $('#viz_group_types');
-  var vizBody = vizDiv.find('tbody');
-  vizBody.empty();
-
-  // Guess that whichever group type has only one value and that value is
-  // empty will be the topline data.
-  var checkedType = null;
-  $.each(groupTypes, function(key, value) {
-    if (value.length == 1 && value[0] === '') {
-      checkedType = key;
-    }
-  });
-
-  var count = getChartCount();
-  $.each(groupTypes, function(key, value) {
-    var row = $('<tr>').addClass('grouping');
-    row.append($('<td>').addClass('title').text(key));
-
-    for (var i = 1; i <= count; ++i) {
-      var useRadio = $('<input type="radio">')
-          .addClass('use-button')
-          .attr('name', 'chart' + i)
-          .attr('value', key)
-          .data('chart', i);
-
-      // Select the default group type.
-      if (!!checkedType && checkedType === key) {
-        useRadio.attr('checked', 'checked');
-      }
-      row.append($('<td>').append(useRadio));
-    }
-
-    vizBody.append(row);
-  });
-
-  // TODO Update the visualization
-  // TODO Update event handlers
-}
-
-
-function createGroupValueCheckboxes(chartNumber) {
-  
-}
-
-
-function createAllGroupValueCheckboxes() {
-  for (var i = 0, n = getChartCount(); i < n; i++) {
-    createAllGroupValueCheckboxes(i + 1);
-  }
-}
-
-
 function handleClickVisualize() {
   // Parse the CSV data
   var rows = $.csv.toArrays($('#data').val());
@@ -93,7 +108,7 @@ function handleClickVisualize() {
 
   // Setup UI
   createGroupTypeRadios(groupTypes);
-  createAllGroupValueCheckboxes();
+  createGroupValueCheckboxes(groupTypes);
 
   // Build chart
 }
@@ -101,6 +116,9 @@ function handleClickVisualize() {
 
 function init() {
   $('#visualize_my_data').click(handleClickVisualize);
+
+  // Start off with some dummy data
+  handleClickVisualize();
 }
 
 

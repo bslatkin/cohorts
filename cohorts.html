@@ -12,50 +12,29 @@
 
 <h1>Cohort visualizer</h1>
 
-<table id="viz_group_types">
-  <thead>
-    <th>Group type</th>
-    <th>V1</th>
-    <th><button id="add_viz" title="Add another chart">+</button></th>
-  </thead>
-
-  <tbody>
-  </tbody>
-</table>
-
 <table id="viz_container">
   <thead>
-  <tr id="viz_titles">
+  <tr>
     <th id="viz_title1">V1</th>
   </tr>
   </thead>
 
-  <tbody>
-  <tr id="viz_graphs">
-    <td>
-      <div id="viz_graph1">x</div>
-    </td>
+  <tr>
+    <td id="viz_graph1" class="chart-cell">Chart here</td>
   </tr>
-  </tbody>
 
-  <tfoot>
-  <tr id="viz_group_types">
-    <td>
-      <div id="viz1_group_title1">Group type</div>
-    </td>
+  <tr>
+    <td id="viz_group_type1"></td>
   </tr>
-  <tr id="viz_group_values">
-    <td>
-      <div id="viz_groups1">group values</div>
-    </td>
+  <tr>
+    <td id="viz_group_value1">Group values</td>
   </tr>
-  </tfoot>
 </table>
 
 <h1>Paste your CSV here</h2>
 <div>
   <p>
-    <em>Note: No data will go to the server. This is all client-side in your browser.</em>
+    <strong>Note: No data will go to the server. This is all client-side in your browser.</strong>
   </p>
   <p>
 
@@ -85,9 +64,9 @@ Total,,10/26/12,20,10,5
     Format is comma-separated with quotes like Excel.  A guide to columns:
   </p>
   <ol>
-    <li>Cohort group type: Think of this as a enum type.</li>
+    <li>Cohort group type: Think of this as a <a href="http://en.wikipedia.org/wiki/Enumerated_type#C_and_syntactically_similar_languages">enum type</a> name.</li>
     <li>Cohort group value: Think of these as enum values within an enum type.</li>
-    <li>Cohort day: Day to which the entry belongs, in the format DD/MM/YY like 10/25/12 (October 25th, 2012).</li>
+    <li>Cohort day: Day to which the entry belongs, in the format DD/MM/YY (e.g., 10/25/12 would be October 25th, 2012).</li>
     <li>State1: Number of users exclusively in state 1.</li>
     <li>State2: Number of users exclusively in state 2.</li>
     <li>... Additional state columns</li>
@@ -96,13 +75,18 @@ Total,,10/26/12,20,10,5
     First row is used to name the various user states you have. It should be in the format "Cohort group type,Cohort group value,Cohort day,State1 name,State2 name,...".
   </p>
   <p>
-    Each row should be unique within a "cohort group type". The data may have
-    the same user appear in many rows that are of different group types. What's
-    important is for each group type the user is only in one row with one group
-    value.
+    The tuple (group value, cohort day) should be a unique row for each cohort
+    group type. The data may have the same user appear in many rows that are of
+    different group types. What's important is for each group type the user is
+    only in one row with one group value.
   </p>
   <p>
-    Simple example for a fake social network with "Sign-up Referrer", "Favorite feature", and "Total" cohort groups. Here you should only count a user towards one referrer for sign up row, one favorite feature row, and one total row.
+    Here's a simple example for a fake social network with "Sign-up Referrer",
+    "Favorite feature", and "Total" cohort groups. This only counts a user
+    towards one referrer for sign up row, one favorite feature row, and one
+    total row. In the case of "Total" the only valid grouping value is the empty
+    string, which this tool treats specially.
+
     <table>
       <tr>
         <th>Cohort group type</th>
@@ -200,15 +184,14 @@ Total,,10/26/12,20,10,5
         <td>10</td>
         <td>5</td>
       </tr>
-
     </table>
   </p>
 </div>
 
-<h2>More info</h2>
+<h1>More info</h1>
 <div>
 <p>
-  For more info:
+  Things to read to understand the motivation and method behind this:
   <ul>
     <li><a href="http://blog.kera.io/post/33745559146/cohort-analysis-metrics-for-a-scalable-business">Cohort Analysis: Metrics for a Scalable Business (kera.io)</a></li>
     <li><a href="http://www.avc.com/a_vc/2009/10/the-cohort-analysis.html">The Cohort Analysis (avc.com)</li>
