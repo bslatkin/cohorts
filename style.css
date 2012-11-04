@@ -1,6 +1,22 @@
 #viz_container {
-  min-width: 600px;
+  width: 100%;
+  text-align: left;
 }
+
+
+.viz-title {
+  border: 0;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .chart-cell {
   height: 400px;
+}
+
+.group-types-header,
+.group-values-header {
+  display: block;
+  margin: 10px 0;
 }

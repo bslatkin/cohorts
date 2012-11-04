@@ -6,7 +6,7 @@ var DAY_COLUMN = 2;
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
-  vizDiv.append($('<span>').text('Group types'));
+  vizDiv.append($('<span class="group-types-header">').text('Group types'));
 
   // Guess that whichever group type has only one value and that value is
   // empty will be the topline data.
@@ -62,15 +62,18 @@ function createGroupValueCheckboxes(groupTypes) {
     return;
   }
 
-  valuesDiv.append($('<span>').text('Group values'));
+  valuesDiv.append(
+      $('<span class="group-values-header">').text('Group values'));
 
 
   var i = 0;
   $.each(values, function(key, value) {
     var checkboxId = 'group_value_checkbox1_' + (i++);
     var container = $('<div>');
-    container.append($('<input type="checkbox">').attr('id', checkboxId));
-    container.append($('<label>').attr('for', checkboxId).text(value));
+    container.append(
+        $('<input type="checkbox" checked>').attr('id', checkboxId));
+    container.append(
+        $('<label>').attr('for', checkboxId).text(value));
     valuesDiv.append(container);
   });
 }
