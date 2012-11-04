@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="jquery-1.8.2.min.js"></script>
   <script src="d3.v2.min.js"></script>
   <script src="jquery.csv.min.js"></script>
   <script src="cohorts.js"></script>
@@ -12,30 +12,10 @@
 
 <h1>Cohort visualizer</h1>
 
-<table id="viz_container">
-  <thead>
-  <tr>
-    <th id="viz_title1">V1</th>
-    <th id="viz_title2">V2</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-    <td>
-      <div id="viz_graph1">x</div>
-    </td>
-    <td>
-      <div id="viz_graph2">y</div>
-    </td>
-  </tr>
-  </tbody>
-</table>
-
-<table id="viz_groups">
+<table id="viz_group_types">
   <thead>
     <th>Group type</th>
     <th>V1</th>
-    <th>V2</th>
     <th><button id="add_viz" title="Add another chart">+</button></th>
   </thead>
 
@@ -43,6 +23,34 @@
   </tbody>
 </table>
 
+<table id="viz_container">
+  <thead>
+  <tr id="viz_titles">
+    <th id="viz_title1">V1</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <tr id="viz_graphs">
+    <td>
+      <div id="viz_graph1">x</div>
+    </td>
+  </tr>
+  </tbody>
+
+  <tfoot>
+  <tr id="viz_group_types">
+    <td>
+      <div id="viz1_group_title1">Group type</div>
+    </td>
+  </tr>
+  <tr id="viz_group_values">
+    <td>
+      <div id="viz_groups1">group values</div>
+    </td>
+  </tr>
+  </tfoot>
+</table>
 
 <h1>Paste your CSV here</h2>
 <div>

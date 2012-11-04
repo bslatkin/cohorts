@@ -4,7 +4,7 @@ var DAY_COLUMN = 2;
 
 
 function getChartCount() {
-  return $('#viz_container>thead>tr').children().size();
+  return $('#viz_titles').children().size();
 }
 
 
@@ -31,13 +31,21 @@ function extractGroupTypes(csvData) {
 }
 
 
-function createGroupings(groupTypes) {
-  var vizDiv = $('#viz_groups');
+function createGroupTypeRadios(groupTypes) {
+  var vizDiv = $('#viz_group_types');
   var vizBody = vizDiv.find('tbody');
   vizBody.empty();
 
-  var count = getChartCount();
+  // Guess that whichever group type has only one value and that value is
+  // empty will be the topline data.
+  var checkedType = null;
+  $.each(groupTypes, function(key, value) {
+    if (value.length == 1 && value[0] === '') {
+      checkedType = key;
+    }
+  });
 
+  var count = getChartCount();
   $.each(groupTypes, function(key, value) {
     var row = $('<tr>').addClass('grouping');
     row.append($('<td>').addClass('title').text(key));
@@ -48,24 +56,46 @@ function createGroupings(groupTypes) {
           .attr('name', 'chart' + i)
           .attr('value', key)
           .data('chart', i);
+
+      // Select the default group type.
+      if (!!checkedType && checkedType === key) {
+        useRadio.attr('checked', 'checked');
+      }
       row.append($('<td>').append(useRadio));
     }
 
     vizBody.append(row);
   });
 
+  // TODO Update the visualization
   // TODO Update event handlers
 }
 
 
+function createGroupValueCheckboxes(chartNumber) {
+  
+}
+
+
+function createAllGroupValueCheckboxes() {
+  for (var i = 0, n = getChartCount(); i < n; i++) {
+    createAllGroupValueCheckboxes(i + 1);
+  }
+}
+
+
 function handleClickVisualize() {
+  // Parse the CSV data
   var rows = $.csv.toArrays($('#data').val());
   console.log(rows);
-
   var groupTypes = extractGroupTypes(rows);
   console.log(groupTypes);
 
-  createGroupings(groupTypes);
+  // Setup UI
+  createGroupTypeRadios(groupTypes);
+  createAllGroupValueCheckboxes();
+
+  // Build chart
 }
 
 
