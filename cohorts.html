@@ -5,8 +5,49 @@
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="d3.v2.min.js"></script>
   <script src="jquery.csv.min.js"></script>
+  <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
 </head>
 <body>
+
+<h1>Cohort visualizer</h1>
+
+<table id="container">
+  <tr>
+    <td>
+      <div id="graph1">x</div>
+    </td>
+    <td>
+      <div id="graph2">y</div>
+    </td>
+  </tr>
+</table>
+
+<h2>Paste your CSV here</h2>
+<div>
+  <p>
+    <em>Note: No data will go to the server. This is all client-side in your browser.</em>
+  </p>
+  <p>
+
+<textarea cols="120" rows="15">
+Cohort group type,Cohort group value,Cohort day,Born,Updated profile,Sent first message
+Sign-up referrer,Search,10/25/12,5,5,5
+Sign-up referrer,Search,10/25/12,10,10,0
+Sign-up referrer,Email,10/26/12,5,5,5
+Sign-up referrer,Email,10/26/12,5,0,5
+Favorite feature,Chat,10/25/12,0,5,10
+Favorite feature,Chat,10/26/12,15,5,0
+Favorite feature,Reading news,10/25/12,10,5,0
+Favorite feature,Reading news,10/26/12,5,5,5
+Total,,10/25/12,10,10,10
+Total,,10/26/12,20,10,5
+</textarea>
+
+  </p>
+  <p>
+    <button>Visualize my data</button>
+  </p>
+</div>
 
 <h2>CSV format explanation</h2>
 <div>
@@ -31,81 +72,119 @@
     value.
   </p>
   <p>
-    Simple example with "hour of day", "day of week", and "total" cohort groups. Here you should only count a user towards one day, one hour, and one total row.
+    Simple example for a fake social network with "Sign-up Referrer", "Favorite feature", and "Total" cohort groups. Here you should only count a user towards one referrer for sign up row, one favorite feature row, and one total row.
     <table>
       <tr>
         <th>Cohort group type</th>
         <th>Cohort group value</th>
         <th>Cohort day</th>
         <th>Born</th>
-        <th>Discovered meaning of life</th>
-        <th>Achieved enlightenment</th>
+        <th>Updated profile</th>
+        <th>Sent first message</th>
       </tr>
+
+      <!-- Sign-up referrer -->
       <tr>
-        <td>Total</td>
-        <td></td>
+        <td>Sign-up referrer</td>
+        <td>Search</td>
         <td>10/25/12</td>
         <td>5</td>
         <td>5</td>
         <td>5</td>
+      </tr>
+      <tr>
+        <td>Sign-up referrer</td>
+        <td>Search</td>
+        <td>10/25/12</td>
+        <td>10</td>
+        <td>10</td>
+        <td>0</td>
+      </tr>
+
+      <tr>
+        <td>Sign-up referrer</td>
+        <td>Email</td>
+        <td>10/26/12</td>
+        <td>5</td>
+        <td>5</td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>Sign-up referrer</td>
+        <td>Email</td>
+        <td>10/26/12</td>
+        <td>5</td>
+        <td>0</td>
+        <td>5</td>
+      </tr>
+
+      <!-- Favorite feature -->
+      <tr>
+        <td>Favorite feature</td>
+        <td>Chat</td>
+        <td>10/25/12</td>
+        <td>0</td>
+        <td>5</td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td>Favorite feature</td>
+        <td>Chat</td>
+        <td>10/26/12</td>
+        <td>15</td>
+        <td>5</td>
+        <td>0</td>
+      </tr>
+
+      <tr>
+        <td>Favorite feature</td>
+        <td>Reading news</td>
+        <td>10/25/12</td>
+        <td>10</td>
+        <td>5</td>
+        <td>0</td>
+      </tr>
+      <tr>
+        <td>Favorite feature</td>
+        <td>Reading news</td>
+        <td>10/26/12</td>
+        <td>5</td>
+        <td>5</td>
+        <td>5</td>
+      </tr>
+
+      <!-- Total -->
+      <tr>
+        <td>Total</td>
+        <td></td>
+        <td>10/25/12</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
       </tr>
       <tr>
         <td>Total</td>
         <td></td>
         <td>10/26/12</td>
-        <td>15</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td>Day of Week</td>
-        <td>Monday</td>
-        <td>10/25/12</td>
-        <td>5</td>
-        <td>5</td>
+        <td>20</td>
+        <td>10</td>
         <td>5</td>
       </tr>
-      <tr>
-        <td>Day of Week</td>
-        <td>Tuesday</td>
-        <td>10/26/12</td>
-        <td>15</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td>Hour of Day</td>
-        <td>10am</td>
-        <td>10/25/12</td>
-        <td>3</td>
-        <td>2</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td>Hour of Day</td>
-        <td>11am</td>
-        <td>10/25/12</td>
-        <td>1</td>
-        <td>3</td>
-        <td>5</td>
-      </tr>
+
     </table>
   </p>
-
 </div>
 
-<h2>Paste your CSV here</h2>
+<h2>More info</h2>
 <div>
-  <p>
-    <em>Note: No data will go to the server. This is all client-side in your browser.</em>
-  </p>
-  <p>
-    <!-- TODO: Put a sample in the text area -->
-    <textarea cols="120" rows="15"></textarea>
-  </p>
-  <p>
-    <button>Process my data</button>
-  </p>
+<p>
+  For more info:
+  <ul>
+    <li><a href="http://blog.kera.io/post/33745559146/cohort-analysis-metrics-for-a-scalable-business">Cohort Analysis: Metrics for a Scalable Business (kera.io)</a></li>
+    <li><a href="http://www.avc.com/a_vc/2009/10/the-cohort-analysis.html">The Cohort Analysis (avc.com)</li>
+    <li><a href="http://www.onebigfluke.com/2012/10/doing-cohort-analysis-with-map-reduce.html">Doing Cohort Analysis with Map Reduce (my blog)</li>
+  </ul>
+</p>
 </div>
 
 </body>
