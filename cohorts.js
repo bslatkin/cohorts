@@ -3,6 +3,11 @@ var GROUP_VALUE_COLUMN = 1;
 var DAY_COLUMN = 2;
 
 
+function getChartCount() {
+  return $('#viz_container>thead>tr').children().size();
+}
+
+
 function extractGroupTypes(csvData) {
   // Maps cohort group types to lists of cohort group values
   var cohortGroupTypes = {};
@@ -31,17 +36,25 @@ function createGroupings(groupTypes) {
   var vizBody = vizDiv.find('tbody');
   vizBody.empty();
 
+  var count = getChartCount();
+
   $.each(groupTypes, function(key, value) {
     var row = $('<tr>').addClass('grouping');
     row.append($('<td>').addClass('title').text(key));
-    row.append(
-      $('<td>').append($('<button>').addClass('use-left').text('Use')));
-    row.append(
-      $('<td>').append($('<button>').addClass('use-right').text('Use')));
+
+    for (var i = 1; i <= count; ++i) {
+      var useRadio = $('<input type="radio">')
+          .addClass('use-button')
+          .attr('name', 'chart' + i)
+          .attr('value', key)
+          .data('chart', i);
+      row.append($('<td>').append(useRadio));
+    }
+
     vizBody.append(row);
   });
 
-  vizDiv.show();
+  // TODO Update event handlers
 }
 
 
