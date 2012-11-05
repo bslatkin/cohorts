@@ -257,7 +257,7 @@ function updateViz(rows) {
     .enter().append('svg:g')
       .attr('class', 'layer')
       .style('fill', getColor)
-      .style('stroke', 0);
+      .style('stroke', d3.rgb('#333'));
 
   var bars = layers.selectAll('g.bar')
       .data(function(d) { return d.values; })
