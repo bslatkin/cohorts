@@ -66,7 +66,7 @@ Total,,10/26/12,20,10,5
     Format is comma-separated with quotes like Excel.  A guide to columns:
   </p>
   <ol>
-    <li>Cohort group type: Think of this as a <a href="http://en.wikipedia.org/wiki/Enumerated_type#C_and_syntactically_similar_languages">enum type</a> name.</li>
+    <li>Cohort group type: Think of this as an <a href="http://en.wikipedia.org/wiki/Enumerated_type#C_and_syntactically_similar_languages">enum type</a> name.</li>
     <li>Cohort group value: Think of these as enum values within an enum type.</li>
     <li>Cohort day: Day to which the entry belongs, in the format DD/MM/YY (e.g., 10/25/12 would be October 25th, 2012).</li>
     <li>State1: Number of users exclusively in state 1.</li>
@@ -77,10 +77,10 @@ Total,,10/26/12,20,10,5
     First row is used to name the various user states you have. It should be in the format "Cohort group type,Cohort group value,Cohort day,State1 name,State2 name,...".
   </p>
   <p>
-    The tuple (group value, cohort day) should be a unique row for each cohort
-    group type. The data may have the same user appear in many rows that are of
-    different group types. What's important is for each group type the user is
-    only in one row with one group value.
+    The dataset may have the same user appear in many rows that are of different
+    group types. What's important is for each group type the user is only in one
+    row with one group value; aka the tuple (group value, cohort day) should be
+    a unique row for each cohort group type.
   </p>
   <p>
     Here's a simple example for a fake social network with "Sign-up Referrer",

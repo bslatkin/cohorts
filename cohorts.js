@@ -3,6 +3,19 @@ var GROUP_VALUE_COLUMN = 1;
 var DAY_COLUMN = 2;
 
 
+function getSelectedGroupType() {
+  return $('input:radio[name=\'chart1\']:checked').val();
+}
+
+
+function getSelectedGroupValues() {
+  return $.makeArray(
+    $('.group-value-checkbox:checked').map(function(index, el) {
+      return $(el).val();
+    }));
+}
+
+
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
@@ -47,7 +60,7 @@ function createGroupTypeRadios(groupTypes) {
 
 
 function createGroupValueCheckboxes(groupTypes) {
-  var type = $('input:radio[name=\'chart1\']:checked').val();
+  var type = getSelectedGroupType();
   var values = groupTypes[type];
   if (!values) {
     $.error('Bad group type: ' + type);
@@ -70,6 +83,7 @@ function createGroupValueCheckboxes(groupTypes) {
     var container = $('<div>');
     container.append(
         $('<input type="checkbox" class="group-value-checkbox" checked>')
+        .attr('value', value)
         .attr('id', checkboxId));
     container.append(
         $('<label>').attr('for', checkboxId).text(value));
@@ -101,20 +115,26 @@ function filterData(rows, groupType, groupValues) {
 
   // Filter matching group type and group values.
   $.each(rows, function(index, value) {
-    if (groupType !== rows[GROUP_TYPE_COLUMN]) {
+    if (groupType !== value[GROUP_TYPE_COLUMN]) {
       return;
     }
-    if (groupValues.indexOf(rows[GROUP_TYPE_COLUMN]) == -1) {
+    if (groupValues.length > 0 &&
+        groupValues.indexOf(value[GROUP_VALUE_COLUMN]) == -1) {
       return;
     }
-    var cohort = getCohort(rows[DAY_COLUMN]);
+    var cohort = getCohort(value[DAY_COLUMN]);
     var cohortRows = cohorts[cohort];
     if (!cohortRows) {
-      // First row for a cohort.
-      cohorts[cohort] = value.slice(3);
+      // First row for a cohort. Truncate the group type, group name, and date
+      // columns, leaving just numeric data.
+      var firstRow = [];
+      for (var i = 3, n = value.length; i < n; ++i) {
+        firstRow.push(parseInt(value[i]));
+      }
+      cohorts[cohort] = firstRow;
     } else {
       for (var i = 0, n = cohortRows.length; i < n; ++i) {
-        cohortRows[i] += value[i];
+        cohortRows[i] += parseInt(value[i + 3]);
       }
     }
   });
@@ -124,9 +144,11 @@ function filterData(rows, groupType, groupValues) {
   keys.sort();
 
   // Return an array of arrays, with the cohort as the first column.
-  return $.map(keys, function(value, index) {
-    return [value].concat(cohorts[value]);
+  var result = [];
+  $.each(keys, function(index, value) {
+    result.push([value].concat(cohorts[value]))
   });
+  return result;
 }
 
 
@@ -153,7 +175,12 @@ function extractGroupTypes(csvData) {
 
 
 function updateViz(rows) {
-  
+  var groupType = getSelectedGroupType();
+  var groupValues = getSelectedGroupValues();
+  var view = filterData(rows, groupType, groupValues);
+  console.log('Filtered to: type="' + groupType +
+              '", values="' + (groupValues.join('|')) +
+              '"; ' + view.length + ' rows found');
 }
 
 
@@ -174,7 +201,7 @@ function handleClickVisualize() {
   });
 
   // Build chart
-//  updateViz(rows, groupTypes);
+  $(document).trigger('cohorts.viz');
 }
 
 
