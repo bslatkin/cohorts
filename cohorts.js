@@ -38,16 +38,15 @@ function createGroupTypeRadios(groupTypes) {
     vizDiv.append(container);
   });
 
-  // Update event handlers
-  $('.group-type-radio').click(
-      function() { createGroupValueCheckboxes(groupTypes); });
-
-  // TODO Update the visualization
+  // Register event handlers
+  $('.group-type-radio').click(function() {
+    createGroupValueCheckboxes(groupTypes);
+    $(document).trigger('cohorts.viz');
+  });
 }
 
 
 function createGroupValueCheckboxes(groupTypes) {
-  console.log('here!');
   var type = $('input:radio[name=\'chart1\']:checked').val();
   var values = groupTypes[type];
   if (!values) {
@@ -65,16 +64,68 @@ function createGroupValueCheckboxes(groupTypes) {
   valuesDiv.append(
       $('<span class="group-values-header">').text('Group values'));
 
-
   var i = 0;
   $.each(values, function(key, value) {
     var checkboxId = 'group_value_checkbox1_' + (i++);
     var container = $('<div>');
     container.append(
-        $('<input type="checkbox" checked>').attr('id', checkboxId));
+        $('<input type="checkbox" class="group-value-checkbox" checked>')
+        .attr('id', checkboxId));
     container.append(
         $('<label>').attr('for', checkboxId).text(value));
     valuesDiv.append(container);
+  });
+
+  // Register event handlers
+  $('.group-value-checkbox').click(function() {
+    $(document).trigger('cohorts.viz');
+  });
+}
+
+
+function updateViz(data, groupTypes) {
+  
+};
+
+
+function getCohort(cohortDay) {
+  // TODO: Do date-based grouping with start/end times.
+  return cohortDay;
+};
+
+
+function filterData(rows, groupType, groupValues) {
+  // Maps cohort key to the combined data row for the key. The data rows in
+  // the values of this map have all cohort columns removed.
+  var cohorts = {};
+
+  // Filter matching group type and group values.
+  $.each(rows, function(index, value) {
+    if (groupType !== rows[GROUP_TYPE_COLUMN]) {
+      return;
+    }
+    if (groupValues.indexOf(rows[GROUP_TYPE_COLUMN]) == -1) {
+      return;
+    }
+    var cohort = getCohort(rows[DAY_COLUMN]);
+    var cohortRows = cohorts[cohort];
+    if (!cohortRows) {
+      // First row for a cohort.
+      cohorts[cohort] = value.slice(3);
+    } else {
+      for (var i = 0, n = cohortRows.length; i < n; ++i) {
+        cohortRows[i] += value[i];
+      }
+    }
+  });
+
+  // Sort cohort keys in ascending order.
+  var keys = $.map(cohorts, function(value, key) { return key; });
+  keys.sort();
+
+  // Return an array of arrays, with the cohort as the first column.
+  return $.map(keys, function(value, index) {
+    return [value].concat(cohorts[value]);
   });
 }
 
@@ -83,8 +134,7 @@ function extractGroupTypes(csvData) {
   // Maps cohort group types to lists of cohort group values
   var cohortGroupTypes = {};
 
-  // Skip row 0, which is the header
-  for (var i = 1; i < csvData.length; ++i) {
+  for (var i = 0; i < csvData.length; ++i) {
     var row = csvData[i];
     var groupType = row[GROUP_TYPE_COLUMN];
     var groupValue = row[GROUP_VALUE_COLUMN];
@@ -102,25 +152,36 @@ function extractGroupTypes(csvData) {
 }
 
 
+function updateViz(rows) {
+  
+}
+
+
 function handleClickVisualize() {
   // Parse the CSV data
-  var rows = $.csv.toArrays($('#data').val());
-  console.log(rows);
+  var rowWithHeader = $.csv.toArrays($('#data').val());
+  var rows = rowWithHeader.slice(1)
   var groupTypes = extractGroupTypes(rows);
-  console.log(groupTypes);
 
   // Setup UI
   createGroupTypeRadios(groupTypes);
   createGroupValueCheckboxes(groupTypes);
 
+  // Register event handlers
+  $(document).unbind('cohorts.viz');
+  $(document).bind('cohorts.viz', function() {
+    updateViz(rows);
+  });
+
   // Build chart
+//  updateViz(rows, groupTypes);
 }
 
 
 function init() {
   $('#visualize_my_data').click(handleClickVisualize);
 
-  // Start off with some dummy data
+  // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
 }
 
