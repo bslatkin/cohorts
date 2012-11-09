@@ -155,7 +155,7 @@ function filterData(rows, groupType, groupValues) {
         data = []
         columns[header] = data;
       }
-      data.push({cohort: key, height: value[index]});
+      data.push({cohort: key, x: keys.indexOf(key), y: value[index]});
     });
   });
 
@@ -163,7 +163,7 @@ function filterData(rows, groupType, groupValues) {
   $.each(columns, function(key, value) {
     var total = 0;
     $.each(value, function(index, cell) {
-      total += cell.height;
+      total += cell.y;
     });
     data.push({name: key, values: value, total: total});
   });
@@ -216,6 +216,7 @@ function updateViz(rows) {
   console.log('Filtered to: type="' + groupType +
               '", values="' + (groupValues.join('|')) +
               '"; ' + viewCohorts.length + ' rows found');
+  console.log(viewCohorts);
   console.log(viewBarGroups);
 
   var height = 400;
@@ -229,13 +230,13 @@ function updateViz(rows) {
   ];
 
   var scaleX = d3.scale.linear()
-      .domain([0, 3])
+      .domain([0, viewCohorts.length])
       .range([0, width]);
-  var barWidth = width / data[0].length;
-  var maxY = 50;  // set this to 1 and use 'expand' for equal view
-  scaleY = d3.scale.linear()
+  var barWidth = width / viewCohorts.length;
+  var maxY = d3.max(viewBarGroups, function(d) { return d.total });
+  var scaleY = d3.scale.linear()
       .domain([0, maxY])
-      .range([0, height-20]);
+      .range([0, height-20]);  // fix this hack for text
   var scaleColor = d3.scale.category20();
 
   var getColor = function(d, i) {
@@ -245,23 +246,23 @@ function updateViz(rows) {
     return scaleX(d.x);
   };
   var getY = function(d) {
-    console.log('Get y maxY = ' + maxY);
-    console.log(d);
+    // console.log('Get y maxY = ' + maxY);
+    // console.log(d);
     return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
-    console.log('Get height');
-    console.log(d);
+    // console.log('Get height');
+    // console.log(d);
     return scaleY(d.y);
   };
+  var getValues = function(d) { return d.values; };
 
   var chart = d3.select('#viz_graph1').select('svg.stacked')
         .attr('width', width)
         .attr('height', height)
       .append('svg:g');
 
-  var stack = d3.layout.stack()(data);
-    // .values(function(d) { return d.values; })(viewBarGroups);
+  var stack = d3.layout.stack().values(getValues)(viewBarGroups);
 
   var layers = chart.selectAll('g.layer')
       .data(stack)
@@ -271,24 +272,24 @@ function updateViz(rows) {
       .style('stroke', d3.rgb('#333'));
 
   var bars = layers.selectAll('rect.bar')
-      .data(function(d) { return d; })
+      .data(getValues)
     .enter().append('svg:rect')
       .attr('class', 'bar')
       .attr('width', barWidth)
       .attr('x', getX)
       .attr('y', getY)
       .attr('height', getHeight);
-
-  var labels = chart.selectAll("text.label")
-      .data([{'x': 0, 'label': 'a'}, {'x': 1, 'label': 'b'}, {'x': 2, 'label': 'c'}])
-    .enter().append("text")
-      .attr("class", "label")
-      .attr('x', getX)
-      .attr('y', height - 20)  // make this height from the scale
-      .attr('dx', barWidth/2)
-      .attr("dy", '20px')
-      .attr("text-anchor", "middle")
-      .text(function(d, i) { return d.label; });
+  // 
+  // var labels = chart.selectAll("text.label")
+  //     .data([{'x': 0, 'label': 'a'}, {'x': 1, 'label': 'b'}, {'x': 2, 'label': 'c'}])
+  //   .enter().append("text")
+  //     .attr("class", "label")
+  //     .attr('x', getX)
+  //     .attr('y', height - 20)  // make this height from the scale
+  //     .attr('dx', barWidth/2)
+  //     .attr("dy", '20px')
+  //     .attr("text-anchor", "middle")
+  //     .text(function(d, i) { return d.label; });
 
   var normalized = false;
   window.mytransition = function() {
