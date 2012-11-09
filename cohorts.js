@@ -231,31 +231,26 @@ function updateViz(rows) {
       .domain([0, 3])
       .range([0, width]);
   var barWidth = width / data[0].length;
-  var maxY = 50;
+  var maxY = 50;  // set this to 1 and use 'expand' for equal view
   scaleY = d3.scale.linear()
       .domain([0, maxY])
       .range([0, height]);
   var scaleColor = d3.scale.category20();
 
-  var getColor = function(d) {
-    return scaleColor(data.indexOf(d));
-  };
+  // var getColor = function(d) {
+  //   return scaleColor(data.indexOf(d));
+  // };
   var getX = function(d) {
     return scaleX(d.x);
   };
-  var getOut = function(d, y0, y) {
-    console.log('propagate');
-    console.log(d);
-    console.log('y = ' + y + ', y0 = ' + y0);
-
-    console.log('y = ' + y + ', y0 = ' + y0);
-    d.y0 = y0;
-    d.y = y;
-  };
   var getY = function(d) {
+    console.log('Get y maxY = ' + maxY);
+    console.log(d);
     return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
+    console.log('Get height');
+    console.log(d);
     return scaleY(d.y);
   };
 
@@ -264,9 +259,7 @@ function updateViz(rows) {
         .attr('height', height)
       .append('svg:g');
 
-  var stack = d3.layout.stack()
-      .out(getOut)
-      (data);
+  var stack = d3.layout.stack()(data);
     // .values(function(d) { return d.values; })(viewBarGroups);
 
   var layers = chart.selectAll('g.layer')
@@ -276,7 +269,7 @@ function updateViz(rows) {
       .style('fill', '#999')
       .style('stroke', d3.rgb('#333'));
 
-  var bars = layers.selectAll('g.bar')
+  var bars = layers.selectAll('rect.bar')
       .data(function(d) { return d; })
     .enter().append('svg:rect')
       .attr('class', 'bar')
@@ -285,7 +278,45 @@ function updateViz(rows) {
       .attr('y', getY)
       .attr('height', getHeight);
 
-  console.log(data);
+  var normalized = false;
+  window.mytransition = function() {
+    console.log('top');
+    var chart2 = d3.select('#viz_graph1').selectAll('g.layer');
+    console.log(chart2);
+    var t1 = chart2
+        .data(function() {
+          var data2 = [
+            [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
+            [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
+          ];
+          normalized = !normalized;
+          console.log('here! ' + normalized);
+          console.log(data2);
+          if (normalized) {
+            // Transition to normalized
+            maxY = 1;
+            scaleY.domain([0, 1]);
+            return d3.layout.stack().offset('expand')(data2);
+          } else {
+            // Transition to not normalized
+            maxY = 50;
+            scaleY.domain([0, 50]);
+            return d3.layout.stack()(data2);
+          }
+        });
+    var t2 = d3.select('#viz_graph1')
+        .selectAll('g.layer').selectAll('rect.bar');
+    console.log(t2);
+        t2.data(function(d, i) {
+          console.log('Transitioning bar data! ' + i);
+          console.log(d);
+          return d;
+        })
+          .transition()
+        .duration(1000)
+          .attr('y', getY)
+          .attr('height', getHeight);
+  };
 
   // chart.selectAll('rect').data(stack(viewBarGroups));
 
