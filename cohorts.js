@@ -221,52 +221,71 @@ function updateViz(rows) {
   var height = 400;
   var width = 500;
 
+
+  var data = [
+    [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
+    [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
+  ];
+
   var scaleX = d3.scale.linear()
-      .range([0, width])
-      .domain([0, viewCohorts.length]);
-  // TODO: Have a scale object for each column
-  var scaleY = d3.scale.linear()
-      .range([0, height])
-      .domain([0, d3.max(viewBarGroups, function(d) { return d.total; })]);
+      .domain([0, 3])
+      .range([0, width]);
+  var barWidth = width / data[0].length;
+  var maxY = 50;
+  scaleY = d3.scale.linear()
+      .domain([0, maxY])
+      .range([0, height]);
   var scaleColor = d3.scale.category20();
 
   var getColor = function(d) {
-    return scaleColor(viewCohorts.indexOf(d.cohort));
+    return scaleColor(data.indexOf(d));
   };
   var getX = function(d) {
-    return scaleX(viewCohorts.indexOf(d.cohort));
+    return scaleX(d.x);
+  };
+  var getOut = function(d, y0, y) {
+    console.log('propagate');
+    console.log(d);
+    console.log('y = ' + y + ', y0 = ' + y0);
+
+    console.log('y = ' + y + ', y0 = ' + y0);
+    d.y0 = y0;
+    d.y = y;
   };
   var getY = function(d) {
-    return -scaleY(d.height);
+    return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
-    return scaleY(d.height);
+    return scaleY(d.y);
   };
 
   var chart = d3.select('#viz_graph1').select('svg.stacked')
         .attr('width', width)
         .attr('height', height)
-      .append('svg:g')
-        .attr('transform', 'translate(0, 400)');
+      .append('svg:g');
 
   var stack = d3.layout.stack()
-    .values(function(d) { return d.values; })(viewBarGroups);
+      .out(getOut)
+      (data);
+    // .values(function(d) { return d.values; })(viewBarGroups);
 
   var layers = chart.selectAll('g.layer')
       .data(stack)
     .enter().append('svg:g')
       .attr('class', 'layer')
-      .style('fill', getColor)
+      .style('fill', '#999')
       .style('stroke', d3.rgb('#333'));
 
   var bars = layers.selectAll('g.bar')
-      .data(function(d) { return d.values; })
+      .data(function(d) { return d; })
     .enter().append('svg:rect')
       .attr('class', 'bar')
-      .attr('width', 30)
+      .attr('width', barWidth)
       .attr('x', getX)
       .attr('y', getY)
       .attr('height', getHeight);
+
+  console.log(data);
 
   // chart.selectAll('rect').data(stack(viewBarGroups));
 
