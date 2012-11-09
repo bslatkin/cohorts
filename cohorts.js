@@ -224,6 +224,8 @@ function updateViz(rows) {
   var data = [
     [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
     [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
+    [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
+    [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
   ];
 
   var scaleX = d3.scale.linear()
@@ -298,6 +300,8 @@ function updateViz(rows) {
           var data2 = [
             [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
             [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
+            [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
+            [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
           ];
           normalized = !normalized;
           console.log('here! ' + normalized);
