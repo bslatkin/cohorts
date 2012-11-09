@@ -236,9 +236,9 @@ function updateViz(rows) {
       .range([0, height-20]);
   var scaleColor = d3.scale.category20();
 
-  // var getColor = function(d) {
-  //   return scaleColor(data.indexOf(d));
-  // };
+  var getColor = function(d, i) {
+    return scaleColor(i);
+  };
   var getX = function(d) {
     return scaleX(d.x);
   };
@@ -265,7 +265,7 @@ function updateViz(rows) {
       .data(stack)
     .enter().append('svg:g')
       .attr('class', 'layer')
-      .style('fill', '#999')
+      .style('fill', getColor)
       .style('stroke', d3.rgb('#333'));
 
   var bars = layers.selectAll('rect.bar')
