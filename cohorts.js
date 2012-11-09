@@ -221,7 +221,6 @@ function updateViz(rows) {
   var height = 400;
   var width = 500;
 
-
   var data = [
     [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
     [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
@@ -234,7 +233,7 @@ function updateViz(rows) {
   var maxY = 50;  // set this to 1 and use 'expand' for equal view
   scaleY = d3.scale.linear()
       .domain([0, maxY])
-      .range([0, height]);
+      .range([0, height-20]);
   var scaleColor = d3.scale.category20();
 
   // var getColor = function(d) {
@@ -277,6 +276,17 @@ function updateViz(rows) {
       .attr('x', getX)
       .attr('y', getY)
       .attr('height', getHeight);
+
+  var labels = chart.selectAll("text.label")
+      .data([{'x': 0, 'label': 'a'}, {'x': 1, 'label': 'b'}, {'x': 2, 'label': 'c'}])
+    .enter().append("text")
+      .attr("class", "label")
+      .attr('x', getX)
+      .attr('y', height - 20)  // make this height from the scale
+      .attr('dx', barWidth/2)
+      .attr("dy", '20px')
+      .attr("text-anchor", "middle")
+      .text(function(d, i) { return d.label; });
 
   var normalized = false;
   window.mytransition = function() {
