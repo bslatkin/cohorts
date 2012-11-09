@@ -264,12 +264,14 @@ function updateViz(rows) {
 
   var stack = d3.layout.stack().values(getValues)(viewBarGroups);
 
-  var layers = chart.selectAll('g.layer')
-      .data(stack)
-    .enter().append('svg:g')
+  var layers = chart.selectAll('g.layer').data(stack);
+  layers.enter().append('svg:g')
       .attr('class', 'layer')
       .style('fill', getColor)
       .style('stroke', d3.rgb('#333'));
+
+  // Trying to get old data to remove itself.
+  layers.exit().transition().remove();
 
   var bars = layers.selectAll('rect.bar')
       .data(getValues)
