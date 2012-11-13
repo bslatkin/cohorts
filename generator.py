@@ -28,7 +28,7 @@ group_types = {
 }
 
 duration = 30
-step = math.pi / duration
+step = math.pi / duration / 2
 wave_start = [
   random.random() * -math.pi,
   random.random() * -math.pi,
@@ -37,15 +37,17 @@ wave_start = [
   random.random() * -math.pi,
 ]
 wave_size = [
-  1000 * random.random(),
-  500 * random.random(),
-  250 * random.random(),
+  150 * random.random(),
+  125 * random.random(),
   100 * random.random(),
+  75 * random.random(),
   50 * random.random(),
 ]
 
 def do_wave(i, x):
-  return (1 + math.cos(wave_start[i] + x * step)) * wave_size[i]
+  return int(
+    (1 + math.cos(wave_start[i] + x * step)) * wave_size[i]
+  )
 
 
 start = datetime.date.today() - datetime.timedelta(days=duration)

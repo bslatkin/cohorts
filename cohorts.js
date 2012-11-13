@@ -202,6 +202,12 @@ function extractGroupTypes(csvData) {
 }
 
 
+function clearViz() {
+  d3.select('#viz_graph1')
+      .select('svg.stacked').select('g').selectAll('g.layer').remove();
+}
+
+
 function updateViz(rows) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
@@ -267,26 +273,22 @@ function updateViz(rows) {
       .style('fill', getColor)
       .style('stroke', d3.rgb('#333'));
 
-  var bars = layers.selectAll('rect.bar')
-      .data(getValues)
-    .enter().append('svg:rect')
-      .attr('class', 'bar')
-      .attr('width', barWidth)
-      .attr('x', getX)
-      .attr('y', getY)
-      .attr('height', getHeight);
+  layers.exit().remove();
 
-  // TODO: Use the existing layers object?
-  d3.select('#viz_graph1').selectAll('g.layer').selectAll('rect.bar')
-      .data(function(d, i) {
-        console.log('Transitioning bar data! ' + i);
-        console.log(d);
-        return d.values;
-      })
-    .transition()
-      .duration(1000)
-      .attr('y', getY)
-      .attr('height', getHeight);
+  var bars = layers.selectAll('rect.bar').data(getValues);
+  bars.enter().append('svg:rect')
+    .attr('class', 'bar')
+    .attr('width', barWidth)
+    .attr('x', getX)
+    .attr('y', getY)
+    .attr('height', getHeight);
+
+  bars.exit().remove();
+
+  bars.transition()
+    .duration(1000)
+    .attr('y', getY)
+    .attr('height', getHeight);
 
   // 
   // var labels = chart.selectAll("text.label")
@@ -355,6 +357,9 @@ function handleClickVisualize() {
   $(document).bind('cohorts.viz', function() {
     updateViz(rowsWithHeader);
   });
+
+  // Clear any existing chart
+  clearViz();
 
   // Build chart
   $(document).trigger('cohorts.viz');
