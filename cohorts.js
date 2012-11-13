@@ -153,7 +153,7 @@ function filterData(rows, groupType, groupValues) {
   // Save some metadata about the cohorts.
   var rowData = [];
   $.each(keys, function(index, value) {
-    rowData.push({cohort: value, total: d3.sum(cohorts[value])});
+    rowData.push({cohort: value, x: index, total: d3.sum(cohorts[value])});
   });
 
   // Now regroup the data as sets of points grouped by column (for D3).
@@ -218,14 +218,19 @@ function updateViz(rows) {
   console.log('Filtered to: type="' + groupType +
               '", values="' + (groupValues.join('|')) +
               '"; ' + viewCohorts.length + ' rows found');
-  console.log(viewCohorts);
-  console.log(viewBarGroups);
 
+  // Scale graph to whole window area, with minimum
   var height = 500;
   var width = $('#viz_graph1').width();
   if (width < 600) {
     width = 600;
   }
+
+  // Put margins around the graphs so the axes render without clipping
+  var marginX = 30;
+  var marginY = 20;
+  height -= 2 * marginY;
+  width -= 2 * marginX;
 
   var scaleX = d3.scale.linear()
       .domain([0, viewCohorts.length])
@@ -238,7 +243,7 @@ function updateViz(rows) {
 
   var scaleY = d3.scale.linear()
       .domain([0, maxY])
-      .range([0, height-20]);  // fix this hack for text
+      .range([marginY, height - (2 * marginY)]);
   var scaleColor = d3.scale.category20();
 
   var getColor = function(d, i) {
@@ -257,9 +262,10 @@ function updateViz(rows) {
 
   var chart = d3.select('#viz_graph1')
       .select('svg.stacked')
-        .attr('width', width)
-        .attr('height', height)
-      .select('g');
+        .attr('width', width + 2 * marginX)
+        .attr('height', height + 2 * marginY)
+      .select('g')
+        .attr("transform", "translate(" + marginX + "," + marginY + ")");
 
   var stack = d3.layout.stack();
   if (normalized) {
@@ -286,60 +292,31 @@ function updateViz(rows) {
   bars.exit().remove();
 
   bars.transition()
-    .duration(1000)
+    .duration(500)
     .attr('y', getY)
+    .attr('x', getX)
+    .attr('width', barWidth)
     .attr('height', getHeight);
 
-  // 
-  // var labels = chart.selectAll("text.label")
-  //     .data([{'x': 0, 'label': 'a'}, {'x': 1, 'label': 'b'}, {'x': 2, 'label': 'c'}])
-  //   .enter().append("text")
-  //     .attr("class", "label")
-  //     .attr('x', getX)
-  //     .attr('y', height - 20)  // make this height from the scale
-  //     .attr('dx', barWidth/2)
-  //     .attr("dy", '20px')
-  //     .attr("text-anchor", "middle")
-  //     .text(function(d, i) { return d.label; });
+  // Cohort date axis
+  var format = d3.time.format("%m/%d/%y");
+  var scale = viewCohorts.map(function(d) { return format.parse(d.cohort); });
+  var xAxisScale = d3.time.scale()
+    .domain([scale[0], scale[scale.length - 1]])
+    .range([0, width]);
 
-  // window.mytransition = function() {
-  //   var chart2 = d3.select('#viz_graph1').selectAll('g.layer');
-  //   var t1 = chart2
-  //       .data(function() {
-  //         var data2 = [
-  //           [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
-  //           [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
-  //           [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
-  //           [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
-  //         ];
-  //         normalized = !normalized;
-  //         console.log('here! ' + normalized);
-  //         console.log(data2);
-  //         if (normalized) {
-  //           // Transition to normalized
-  //           maxY = 1;
-  //           scaleY.domain([0, 1]);
-  //           return d3.layout.stack().offset('expand')(data2);
-  //         } else {
-  //           // Transition to not normalized
-  //           maxY = 50;
-  //           scaleY.domain([0, 50]);
-  //           return d3.layout.stack()(data2);
-  //         }
-  //       });
-  //   var t2 = d3.select('#viz_graph1')
-  //       .selectAll('g.layer').selectAll('rect.bar');
-  //   console.log(t2);
-  //       t2.data(function(d, i) {
-  //         console.log('Transitioning bar data! ' + i);
-  //         console.log(d);
-  //         return d;
-  //       })
-  //         .transition()
-  //       .duration(1000)
-  //         .attr('y', getY)
-  //         .attr('height', getHeight);
-  // };
+  var xAxis = d3.svg.axis()
+      .scale(xAxisScale)
+      .ticks(d3.time.weeks)
+      .tickSize(1)
+      .tickFormat(format);
+
+  chart.selectAll('g.bottom.axis').remove();
+
+  chart.append("g")
+      .attr("class", "bottom axis")
+      .attr("transform", "translate(0," + (height-marginY) + ")")
+      .call(xAxis.orient("bottom"));
 }
 
 
@@ -376,7 +353,7 @@ function init() {
   $('#normalize-check').click(trigger);
 
   // TODO: Fix this, add a transition
-  // $(window).resize(trigger);
+  $(window).resize(trigger);
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
