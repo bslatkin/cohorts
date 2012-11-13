@@ -16,6 +16,11 @@ function getSelectedGroupValues() {
 }
 
 
+function getIsNormalized() {
+  return $('input:checkbox[name=\'normalize\']:checked').val();
+}
+
+
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
@@ -145,6 +150,12 @@ function filterData(rows, groupType, groupValues) {
   var keys = $.map(cohorts, function(value, key) { return key; });
   keys.sort();
 
+  // Save some metadata about the cohorts.
+  var rowData = [];
+  $.each(keys, function(index, value) {
+    rowData.push({cohort: value, total: d3.sum(cohorts[value])});
+  });
+
   // Now regroup the data as sets of points grouped by column (for D3).
   var columns = {};
   var headers = rows[0].slice(3);
@@ -159,28 +170,12 @@ function filterData(rows, groupType, groupValues) {
     });
   });
 
-  var data = [];
+  var columnData = [];
   $.each(columns, function(key, value) {
-    var total = 0;
-    $.each(value, function(index, cell) {
-      total += cell.y;
-    });
-    data.push({name: key, values: value, total: total});
+    columnData.push({name: key, values: value});
   });
 
-  return [keys, data];
-
-  // 
-  // // Sort cohort keys in ascending order.
-  // var keys = $.map(cohorts, function(value, key) { return key; });
-  // keys.sort();
-  // 
-  // // Return an array of arrays, with the cohort as the first column.
-  // var result = [];
-  // $.each(keys, function(index, value) {
-  //   result.push([value].concat(cohorts[value]))
-  // });
-  // return result;
+  return [rowData, columnData];
 }
 
 
@@ -210,7 +205,8 @@ function extractGroupTypes(csvData) {
 function updateViz(rows) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
-  var view = filterData(rows, groupType, groupValues);
+  var normalized = getIsNormalized();
+  view = filterData(rows, groupType, groupValues);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
   console.log('Filtered to: type="' + groupType +
@@ -219,21 +215,21 @@ function updateViz(rows) {
   console.log(viewCohorts);
   console.log(viewBarGroups);
 
-  var height = 400;
-  var width = 500;
-
-  var data = [
-    [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
-    [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
-    [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
-    [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
-  ];
+  var height = 500;
+  var width = $('#viz_graph1').width();
+  if (width < 600) {
+    width = 600;
+  }
 
   var scaleX = d3.scale.linear()
       .domain([0, viewCohorts.length])
       .range([0, width]);
   var barWidth = width / viewCohorts.length;
-  var maxY = d3.max(viewBarGroups, function(d) { return d.total });
+  var maxY = d3.max(viewCohorts, function(d) { return d.total; });
+  if (normalized) {
+    maxY = 1;
+  }
+
   var scaleY = d3.scale.linear()
       .domain([0, maxY])
       .range([0, height-20]);  // fix this hack for text
@@ -246,32 +242,30 @@ function updateViz(rows) {
     return scaleX(d.x);
   };
   var getY = function(d) {
-    // console.log('Get y maxY = ' + maxY);
-    // console.log(d);
     return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
-    // console.log('Get height');
-    // console.log(d);
     return scaleY(d.y);
   };
   var getValues = function(d) { return d.values; };
 
-  var chart = d3.select('#viz_graph1').select('svg.stacked')
+  var chart = d3.select('#viz_graph1')
+      .select('svg.stacked')
         .attr('width', width)
         .attr('height', height)
-      .append('svg:g');
+      .select('g');
 
-  var stack = d3.layout.stack().values(getValues)(viewBarGroups);
+  var stack = d3.layout.stack();
+  if (normalized) {
+    stack = stack.offset('expand');
+  }
+  stack = stack.values(getValues)(viewBarGroups);
 
   var layers = chart.selectAll('g.layer').data(stack);
   layers.enter().append('svg:g')
       .attr('class', 'layer')
       .style('fill', getColor)
       .style('stroke', d3.rgb('#333'));
-
-  // Trying to get old data to remove itself.
-  layers.exit().transition().remove();
 
   var bars = layers.selectAll('rect.bar')
       .data(getValues)
@@ -281,6 +275,19 @@ function updateViz(rows) {
       .attr('x', getX)
       .attr('y', getY)
       .attr('height', getHeight);
+
+  // TODO: Use the existing layers object?
+  d3.select('#viz_graph1').selectAll('g.layer').selectAll('rect.bar')
+      .data(function(d, i) {
+        console.log('Transitioning bar data! ' + i);
+        console.log(d);
+        return d.values;
+      })
+    .transition()
+      .duration(1000)
+      .attr('y', getY)
+      .attr('height', getHeight);
+
   // 
   // var labels = chart.selectAll("text.label")
   //     .data([{'x': 0, 'label': 'a'}, {'x': 1, 'label': 'b'}, {'x': 2, 'label': 'c'}])
@@ -293,58 +300,44 @@ function updateViz(rows) {
   //     .attr("text-anchor", "middle")
   //     .text(function(d, i) { return d.label; });
 
-  var normalized = false;
-  window.mytransition = function() {
-    console.log('top');
-    var chart2 = d3.select('#viz_graph1').selectAll('g.layer');
-    console.log(chart2);
-    var t1 = chart2
-        .data(function() {
-          var data2 = [
-            [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
-            [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
-            [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
-            [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
-          ];
-          normalized = !normalized;
-          console.log('here! ' + normalized);
-          console.log(data2);
-          if (normalized) {
-            // Transition to normalized
-            maxY = 1;
-            scaleY.domain([0, 1]);
-            return d3.layout.stack().offset('expand')(data2);
-          } else {
-            // Transition to not normalized
-            maxY = 50;
-            scaleY.domain([0, 50]);
-            return d3.layout.stack()(data2);
-          }
-        });
-    var t2 = d3.select('#viz_graph1')
-        .selectAll('g.layer').selectAll('rect.bar');
-    console.log(t2);
-        t2.data(function(d, i) {
-          console.log('Transitioning bar data! ' + i);
-          console.log(d);
-          return d;
-        })
-          .transition()
-        .duration(1000)
-          .attr('y', getY)
-          .attr('height', getHeight);
-  };
-
-  // chart.selectAll('rect').data(stack(viewBarGroups));
-
-      // 
-      // .data([10, 20, 30])
-      // .enter()
-      //   .append('svg:rect')
-      //     .attr('x', 0)
-      //     .attr('y', function(d, i) { return 10 * i + 1; })
-      //     .attr('height', 25)
-      //     .attr('width', 10);
+  // window.mytransition = function() {
+  //   var chart2 = d3.select('#viz_graph1').selectAll('g.layer');
+  //   var t1 = chart2
+  //       .data(function() {
+  //         var data2 = [
+  //           [{'x': 0, 'y': 10, 'y0': 0}, {'x': 1, 'y': 20}, {'x': 2, 'y': 15}],
+  //           [{'x': 0, 'y': 5}, {'x': 1, 'y': 10}, {'x': 2, 'y': 25}],
+  //           [{'x': 0, 'y': 7}, {'x': 1, 'y': 2}, {'x': 2, 'y': 1}],
+  //           [{'x': 0, 'y': 10}, {'x': 1, 'y': 2}, {'x': 2, 'y': 4}],
+  //         ];
+  //         normalized = !normalized;
+  //         console.log('here! ' + normalized);
+  //         console.log(data2);
+  //         if (normalized) {
+  //           // Transition to normalized
+  //           maxY = 1;
+  //           scaleY.domain([0, 1]);
+  //           return d3.layout.stack().offset('expand')(data2);
+  //         } else {
+  //           // Transition to not normalized
+  //           maxY = 50;
+  //           scaleY.domain([0, 50]);
+  //           return d3.layout.stack()(data2);
+  //         }
+  //       });
+  //   var t2 = d3.select('#viz_graph1')
+  //       .selectAll('g.layer').selectAll('rect.bar');
+  //   console.log(t2);
+  //       t2.data(function(d, i) {
+  //         console.log('Transitioning bar data! ' + i);
+  //         console.log(d);
+  //         return d;
+  //       })
+  //         .transition()
+  //       .duration(1000)
+  //         .attr('y', getY)
+  //         .attr('height', getHeight);
+  // };
 }
 
 
@@ -370,6 +363,15 @@ function handleClickVisualize() {
 
 function init() {
   $('#visualize_my_data').click(handleClickVisualize);
+
+  var trigger = function() {
+    $(document).trigger('cohorts.viz');
+  };
+
+  $('#normalize-check').click(trigger);
+
+  // TODO: Fix this, add a transition
+  // $(window).resize(trigger);
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();

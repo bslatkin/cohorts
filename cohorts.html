@@ -15,23 +15,33 @@
 <table id="viz_container">
   <thead>
   <tr>
-    <th id="viz_title1">
+    <th id="viz_title1" colspan="2">
       <input class="viz-title" type="text" size="50" placeholder="Type a title here">
     </th>
   </tr>
   </thead>
 
   <tr>
-    <td id="viz_graph1" class="chart-cell">
-      <svg class="stacked"></svg>
+    <td id="viz_graph1" class="chart-cell" colspan="2">
+      <svg class="stacked">
+        <g></g>
+      </svg>
     </td>
   </tr>
 
   <tr>
     <td id="viz_group_type1"></td>
+    <td>
+      <div>
+        Controls:
+      </div>
+      <input type="checkbox" name="normalize" id="normalize-check">
+      <label for="normalize-check">Normalize cohorts</label>
+    </td>
   </tr>
   <tr>
     <td id="viz_group_value1">Group values</td>
+    <td>&nbsp;</td>
   </tr>
 </table>
 
