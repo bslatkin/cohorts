@@ -6,3 +6,4 @@
 - Add checkbox to group by week or month
 - Min width doesn't work right
 - Checkbox to hide some cohorts (or a way to base each state at zero so you can see how each state is growing/changing over time)
+- Filter for group values by regex
