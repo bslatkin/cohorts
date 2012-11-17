@@ -32,7 +32,7 @@ out.writerow([
   'Updated profile',
   'Sent first message',
   'Unlocked first achievement',
-  'Made to post',
+  'Made two posts',
 ])
 
 group_types = {
