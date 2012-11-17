@@ -35,30 +35,23 @@ out.writerow([
   'Made two posts',
 ])
 
-group_types = {
-  'Total': [''],
-  'Sign-up referrer': ['Email', 'Search', 'Coupon', 'Tweet'],
-  'Favorite feature': ['Chat', 'Reading news', 'Fun facts', 'Polls'],
-}
+group_types = [
+  ('Total', ['']),
+  ('Sign-up referrer', ['Email', 'Search', 'Coupon', 'Tweet']),
+  ('Favorite feature', ['Chat', 'Reading news', 'Fun facts', 'Polls']),
+]
 
 duration = 30
 step = math.pi / duration / 2
-wave_start = [
-  random.random() * -math.pi,
-  random.random() * -math.pi,
-  random.random() * -math.pi,
-  random.random() * -math.pi,
-  random.random() * -math.pi,
-]
-wave_size = [
-  150 * random.random(),
-  125 * random.random(),
-  100 * random.random(),
-  75 * random.random(),
-  50 * random.random(),
-]
+wave_start = {}
+wave_size = {}
 
 def do_wave(i, x):
+  # Create a new random wave starting point if it doesn't exist.
+  if i not in wave_start:
+    wave_start[i] = random.random() * -math.pi + 3 * len(wave_start) * step
+    wave_size[i] = len(wave_start) * 50 * random.random()
+
   return int(
     (1 + math.cos(wave_start[i] + x * step)) * wave_size[i]
   )
@@ -66,18 +59,23 @@ def do_wave(i, x):
 
 start = datetime.date.today() - datetime.timedelta(days=duration)
 
-for i in xrange(duration):
-  cohort_day = start + datetime.timedelta(days=i)
-  # TODO: Generate group types
-  # for group_type, value_list in group_types.iteritems():
-  #   for value in value_list:
-  out.writerow([
-    'Total',
-    '',
-    cohort_day.strftime('%m/%d/%y'),
-    do_wave(0, i),
-    do_wave(1, i),
-    do_wave(2, i),
-    do_wave(3, i),
-    do_wave(4, i),
-  ])
+for type_number, group in enumerate(group_types):
+  group_type, value_list = group
+
+  for value_number, group_value in enumerate(value_list):
+    wave_index = (type_number * 100) + value_number
+
+    for x in xrange(duration):
+      cohort_day = start + datetime.timedelta(days=x)
+      cohort = cohort_day.strftime('%m/%d/%y')
+
+      out.writerow([
+        group_type,
+        group_value,
+        cohort,
+        do_wave(wave_index, x),
+        do_wave(wave_index + 1, x),
+        do_wave(wave_index + 2, x),
+        do_wave(wave_index + 3, x),
+        do_wave(wave_index + 4, x),
+      ])

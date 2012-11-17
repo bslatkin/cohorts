@@ -96,7 +96,7 @@ function createGroupValueCheckboxes(groupTypes) {
 
   valuesDiv.append(
       $('<div class="controls-header">')
-          .text('Group values'));
+          .text('Included group values'));
 
   var i = 0;
   $.each(values, function(key, value) {
