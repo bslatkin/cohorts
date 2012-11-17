@@ -33,9 +33,7 @@
 .chart-cell {
 }
 
-.group-types-header,
-.group-values-header {
-  display: block;
+.controls-header {
   margin: 10px 0;
 }
 

@@ -40,7 +40,6 @@ function getIsNormalized() {
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
-  vizDiv.append($('<span class="group-types-header">').text('Group types'));
 
   // Guess that whichever group type has only one value and that value is
   // empty will be the topline data.
@@ -96,7 +95,8 @@ function createGroupValueCheckboxes(groupTypes) {
   }
 
   valuesDiv.append(
-      $('<span class="group-values-header">').text('Group values'));
+      $('<div class="controls-header">')
+          .text('Group values'));
 
   var i = 0;
   $.each(values, function(key, value) {
@@ -343,7 +343,7 @@ function updateViz(rows) {
 
   var xAxis = d3.svg.axis()
       .scale(xAxisScale)
-      .ticks(d3.time.weeks)
+      .ticks(d3.time.days)
       .tickSize(1)
       .tickFormat(format);
 
@@ -364,11 +364,11 @@ function updateViz(rows) {
   if (normalized) {
     yAxis = yAxis.tickFormat(d3.format("%"))
         .tickSize(1)
-        .tickValues([0, 1]);
+        .tickValues([1]);
   } else {
     yAxis = yAxis.tickFormat(d3.format(",.0f"))
-        .ticks(5)
-        .tickSize(1);
+        .tickSize(1)
+        .tickValues([maxY]);
   }
 
   chart.selectAll('g.left.axis').remove();
