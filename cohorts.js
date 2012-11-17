@@ -37,6 +37,11 @@ function getIsNormalized() {
 }
 
 
+function getIsWeekly() {
+  return $('input:checkbox[name=\'weekly\']:checked').val();
+}
+
+
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
@@ -138,34 +143,59 @@ function createLegend(rowsWithHeader) {
 }
 
 
-function getCohort(cohortDay) {
-  // TODO: Do date-based grouping with start/end times.
-  return cohortDay;
+function getCohort(cohortDay, cohortsInOrder, weekly) {
+  if (weekly) {
+    var index = cohortsInOrder.indexOf(cohortDay);
+    return cohortsInOrder[7 * d3.round(index / 7)];
+  } else {
+    return cohortDay;
+  }
 };
 
 
-function filterData(rows, groupType, groupValues) {
+function filterData(rows, groupType, groupValues, weekly) {
+  // Helper function for only pulling the row data that matches.
+  function shouldSkip(index, value) {
+    // Skip the header row.
+    if (index == 0) {
+      return true;
+    }
+    // Skip rows of the wrong group type.
+    if (groupType !== value[GROUP_TYPE_COLUMN]) {
+      return true;
+    }
+    // Skip rows with unmatched group values. Match everything if no values
+    // were supplied.
+    if (groupValues.length > 0 &&
+        groupValues.indexOf(value[GROUP_VALUE_COLUMN]) == -1) {
+      return true;
+    }
+  }
+
+  // Extract the cohort days so we can do arbitrary time regroupings.
+  var cohortsInOrder = [];
+  $.each(rows, function(index, value) {
+    if (shouldSkip(index, value)) {
+      return;
+    }
+    cohortsInOrder.push(value[DAY_COLUMN]);
+  });
+  var format = d3.time.format("%m/%d/%y");
+  cohortsInOrder.sort(function(a, b) {
+    return d3.ascending(format.parse(a), format.parse(b));
+  });
+
   // Maps cohort key to the combined data row for the key. The data rows in
   // the values of this map have all cohort columns removed.
   var cohorts = {};
 
   // Filter matching group type and group values.
   $.each(rows, function(index, value) {
-    // Skip the header row.
-    if (index == 0) {
+    if (shouldSkip(index, value)) {
       return;
     }
-    // Skip rows of the wrong group type.
-    if (groupType !== value[GROUP_TYPE_COLUMN]) {
-      return;
-    }
-    // Skip rows with unmatched group values. Match everything if no values
-    // were supplied.
-    if (groupValues.length > 0 &&
-        groupValues.indexOf(value[GROUP_VALUE_COLUMN]) == -1) {
-      return;
-    }
-    var cohort = getCohort(value[DAY_COLUMN]);
+
+    var cohort = getCohort(value[DAY_COLUMN], cohortsInOrder, weekly);
     var cohortRows = cohorts[cohort];
     if (!cohortRows) {
       // First row for a cohort. Truncate the group type, group name, and date
@@ -248,7 +278,9 @@ function updateViz(rows) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
   var normalized = getIsNormalized();
-  view = filterData(rows, groupType, groupValues);
+  var weekly = getIsWeekly();
+
+  view = filterData(rows, groupType, groupValues, weekly);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
   // console.log('Filtered to: type="' + groupType +
@@ -337,22 +369,41 @@ function updateViz(rows) {
 
   // Cohort date axis
   var format = d3.time.format("%m/%d/%y");
-  var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
-  var range = viewCohorts.map(function(d, i) { return scaleX(i + 0.5); });
-  var xAxisScale = d3.time.scale()
+  // var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
+  // var range = viewCohorts.map(function(d, i) {
+  //   return scaleX(i) + barWidth / 2;
+  // });
+  // console.log(domain);
+  // console.log(range);
+  // var xAxisScale = d3.time.scale()
+  //   .domain(domain)
+  //   .range(range);
+
+  function filterTicks(value, index) {
+    // With very few ticks, show them all
+    if (viewCohorts.length <= 5) {
+      return true;
+    }
+    if (index % 8 == 0) {
+      return true;
+    }
+    return false;
+  };
+
+  var domain = viewCohorts.map(function(d) { return d.cohort; });
+  var range = viewCohorts.map(function(d, i) {
+    return scaleX(i) + barWidth / 2;
+  });
+  domain = domain.filter(filterTicks);
+  range = range.filter(filterTicks);
+
+  var xAxisScale = d3.scale.ordinal()
     .domain(domain)
     .range(range);
 
   var xAxis = d3.svg.axis()
       .scale(xAxisScale)
-      .tickSize(5, 2, 0)
-      .ticks(5)
-      .tickFormat(format);
-
-  if (domain.length < 5) {
-    // With very few ticks, show only two
-    xAxis = xAxis.ticks(2);
-  }
+      .tickSize(5, 2, 0);
 
   chart.selectAll('g.bottom.axis').remove();
 
@@ -418,8 +469,8 @@ function init() {
   };
 
   $('#normalize-check').click(trigger);
+  $('#weekly-check').click(trigger)
 
-  // TODO: Fix this, add a transition
   $(window).resize(trigger);
 
   // Start off with the dummy data that's in the textarea on page load.

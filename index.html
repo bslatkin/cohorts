@@ -2,6 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <title>Cohort visualizer &raquo; A handy tool for browsing cohorts</title>
+  <meta name="description" content="A cohort is a group of people who share a common characteristic or experience within a defined period. This is a handy tool for browsing cohort datasets.">
 
   <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
 
@@ -9,8 +11,6 @@
   <script src="d3.v2.min.js"></script>
   <script src="jquery.csv.min.js"></script>
   <script src="cohorts.js"></script>
-
-  <title>Cohort visualizer</title>
 
   <script type="text/javascript">
     var _gaq = _gaq || [];
@@ -61,8 +61,14 @@
       <div class="controls-header">
         Controls
       </div>
-      <input type="checkbox" name="normalize" id="normalize-check">
-      <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
+      <div>
+        <input type="checkbox" name="normalize" id="normalize-check">
+        <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
+      </div>
+      <div>
+        <input type="checkbox" name="weekly" id="weekly-check">
+        <label for="weekly-check" title="Group cohorts by week">Weekly</label>
+      </div>
     </td>
     <td>
       <div class="controls-header">
@@ -551,8 +557,11 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
     See the License for the specific language governing permissions and
     limitations under the License.
   </p>
+  <p>
+    <br>
+    Built using <a href="http://www.jquery.org">jQuery</a>, <a href="http://d3js.org/">D3</a>, <a href="http://code.google.com/p/jquery-csv/">jQuery CSV</a>, <a href="http://www.google.com/webfonts">Web Fonts</a>, and <a href="http://subtlepatterns.com/">Subtle Patterns</a>
+  </p>
 </div>
 
 </body>
 </html>
-
