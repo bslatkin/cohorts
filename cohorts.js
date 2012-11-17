@@ -350,10 +350,18 @@ function updateViz(rows) {
     return scaleX(d.x);
   };
   var getY = function(d) {
-    return scaleY(maxY - d.y0 - d.y);
+    if (d.show) {
+      return scaleY(maxY - d.y0 - d.y);
+    } else {
+      return height - marginY;  // TODO: Clean this up
+    }
   };
   var getHeight = function(d) {
-    return scaleY(d.y);
+    if (d.show) {
+      return scaleY(d.y);
+    } else {
+      return 0;
+    }
   };
   var getWidth = function(d, i) {
     if (d.show) {
@@ -389,13 +397,14 @@ function updateViz(rows) {
   var bars = layers.selectAll('rect.bar').data(getValues);
   bars.enter().append('svg:rect')
       .attr('class', 'bar')
-      .attr('x', scaleX(scaleX.domain()[1]))
-      .attr('y', getY)
+      .attr('x', getX)
+      .attr('y', height - marginY) // TODO: Clean this up
       .attr('width', getWidth)
-      .attr('height', getHeight)
+      .attr('height', 0)
     .transition()
       .duration(500)
       .attr('width', getWidth)
+      .attr('height', getHeight)
       .attr('x', getX)
       .attr('y', getY);
 
@@ -403,8 +412,11 @@ function updateViz(rows) {
       .duration(500)
       .attr('x', getX)
       .attr('y', getY)
-      .attr('width', getWidth)
-      .attr('height', getHeight);
+      .attr('height', getHeight)
+    .transition()
+      .delay(500)
+      .attr('width', getWidth);
+
   bars.exit().remove();
 
   // Cohort date axis
