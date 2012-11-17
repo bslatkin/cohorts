@@ -146,7 +146,7 @@ function createLegend(rowsWithHeader) {
 function getCohort(cohortDay, cohortsInOrder, weekly) {
   if (weekly) {
     var index = cohortsInOrder.indexOf(cohortDay);
-    var indexRounded = 6 * Math.floor(index / 7);
+    var indexRounded = 7 * Math.floor(index / 7);
     result = cohortsInOrder[indexRounded];
     return result;
   } else {
@@ -190,6 +190,16 @@ function filterData(rows, groupType, groupValues, weekly) {
   });
   var format = d3.time.format("%m/%d/%y");
   cohortsInOrder.sort(compareCohorts);
+
+
+  // Figure out the width of each cohort grouping by counting all the cohorts
+  // that have the same cohort grouping key.
+  var cohortWidth = {};
+  $.each(cohortsInOrder, function(index, value) {
+    var cohortGrouping = getCohort(value, cohortsInOrder, weekly);
+    var count = cohortWidth[cohortGrouping] || 0;
+    cohortWidth[cohortGrouping] = count + 1;
+  });
 
   // Maps cohort key to the combined data row for the key. The data rows in
   // the values of this map have all cohort columns removed.
@@ -248,7 +258,8 @@ function filterData(rows, groupType, groupValues, weekly) {
       var point = {
         cohort: key,
         x: cohortsInOrder.indexOf(key),
-        y: columnValues[columnIndex]
+        y: columnValues[columnIndex],
+        barWidth: cohortWidth[key] || 0
       };
       data.push(point);
     });
@@ -346,8 +357,20 @@ function updateViz(rows) {
   var getHeight = function(d) {
     return scaleY(d.y);
   };
-  var getWidth = function(d, i) {
-    return barWidth;
+  var getWidth = function(d) {
+    return barWidth * d.barWidth;
+  };
+  var getWidthIntermediate = function(d) {
+    if (d.barWidth == 0) {
+      return barWidth;
+    }
+    return barWidth * d.barWidth;
+  };
+  var getStroke = function(d) {
+    if (d.barWidth == 0) {
+      return 'none';
+    }
+    return d3.rgb('#333');
   };
 
   var getValues = function(d) { return d.values; };
@@ -392,8 +415,14 @@ function updateViz(rows) {
       .attr('x', getX)
       .attr('y', getY)
       .attr('height', getHeight)
+      .attr('stroke', 'none')
+    .transition()
+      .delay(0)
+      .attr('width', getWidthIntermediate)
     .transition()
       .delay(500)
+      .duration(0)
+      .attr('stroke', getStroke)
       .attr('width', getWidth);
 
   bars.exit().remove();
