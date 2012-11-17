@@ -251,9 +251,9 @@ function updateViz(rows) {
   view = filterData(rows, groupType, groupValues);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
-  console.log('Filtered to: type="' + groupType +
-              '", values="' + (groupValues.join('|')) +
-              '"; ' + viewCohorts.length + ' rows found');
+  // console.log('Filtered to: type="' + groupType +
+  //             '", values="' + (groupValues.join('|')) +
+  //             '"; ' + viewCohorts.length + ' rows found');
 
   // Scale graph to whole window area, with minimum
   var height = 500;
