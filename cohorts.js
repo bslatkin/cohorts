@@ -178,13 +178,15 @@ function filterData(rows, groupType, groupValues, weekly) {
   function compareCohorts(a, b) {
     return d3.ascending(format.parse(a), format.parse(b));
   }
-
   var cohortsInOrder = [];
   $.each(rows, function(index, value) {
     if (shouldSkip(index, value)) {
       return;
     }
-    cohortsInOrder.push(value[DAY_COLUMN]);
+    var cohortDay = value[DAY_COLUMN];
+    if (cohortsInOrder.indexOf(cohortDay) == -1) {
+      cohortsInOrder.push(cohortDay);
+    }
   });
   var format = d3.time.format("%m/%d/%y");
   cohortsInOrder.sort(compareCohorts);
@@ -218,44 +220,31 @@ function filterData(rows, groupType, groupValues, weekly) {
 
   // Save some metadata about the cohorts.
   var rowData = [];
-  $.each(cohortsInOrder, function(index, value) {
-    var valueList = cohorts[value];
+  $.each(cohortsInOrder, function(index, key) {
+    var valueList = cohorts[key];
     var total = d3.sum(valueList || []);
     rowData.push({
-      cohort: value,
+      cohort: key,
       x: index,
-      total: total,
-      show: !!valueList
+      total: total
     });
   });
 
   // Now regroup the data as sets of points grouped by column (for D3).
   var columns = {};
   var headers = rows[0].slice(3);
-  $.each(cohortsInOrder, function(index, key) {
-    var columnValues = cohorts[key];
+  $.each(cohorts, function(key, columnValues) {
     $.each(headers, function(columnIndex, header) {
       var data = columns[header];
       if (!data) {
         data = []
         columns[header] = data;
       }
-
-      if (!columnValues) {
-        data.push({
-          cohort: key,
-          x: cohortsInOrder.indexOf(key),
-          y: 0,
-          show: false
-        });
-      } else {
-        data.push({
-          cohort: key,
-          x: cohortsInOrder.indexOf(key),
-          y: columnValues[columnIndex],
-          show: true
-        });
-      }
+      data.push({
+        cohort: key,
+        x: cohortsInOrder.indexOf(key),
+        y: columnValues[columnIndex]
+      });
     });
   });
 
@@ -307,13 +296,9 @@ function updateViz(rows) {
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
-  var realRows = viewCohorts.filter(function(value, index) {
-    return value.show;
-  });
-
   console.log('Filtered to: type="' + groupType +
               '", values="' + (groupValues.join('|')) +
-              '"; ' + realRows.length + ' rows found');
+              '"; ' + viewCohorts.length + ' rows found');
 
   // Scale graph to whole window area, with minimum
   var height = 500;
@@ -332,7 +317,7 @@ function updateViz(rows) {
   var scaleX = d3.scale.linear()
       .domain([0, viewCohorts.length])
       .range([0, width]);
-  var barWidth = width / realRows.length;
+  var barWidth = width / viewCohorts.length;
   var maxY = d3.max(viewCohorts, function(d) { return d.total; });
   if (normalized) {
     maxY = 1;
@@ -350,25 +335,13 @@ function updateViz(rows) {
     return scaleX(d.x);
   };
   var getY = function(d) {
-    if (d.show) {
-      return scaleY(maxY - d.y0 - d.y);
-    } else {
-      return height - marginY;  // TODO: Clean this up
-    }
+    return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
-    if (d.show) {
-      return scaleY(d.y);
-    } else {
-      return 0;
-    }
+    return scaleY(d.y);
   };
   var getWidth = function(d, i) {
-    if (d.show) {
-      return barWidth;
-    } else {
-      return 0;
-    }
+    return barWidth;
   };
 
   var getValues = function(d) { return d.values; };
