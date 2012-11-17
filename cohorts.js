@@ -146,7 +146,9 @@ function createLegend(rowsWithHeader) {
 function getCohort(cohortDay, cohortsInOrder, weekly) {
   if (weekly) {
     var index = cohortsInOrder.indexOf(cohortDay);
-    return cohortsInOrder[7 * d3.round(index / 7)];
+    var indexRounded = 7 * Math.floor(index / 7);
+    return cohortsInOrder[indexRounded];
+    return result;
   } else {
     return cohortDay;
   }
@@ -173,6 +175,10 @@ function filterData(rows, groupType, groupValues, weekly) {
   }
 
   // Extract the cohort days so we can do arbitrary time regroupings.
+  function compareCohorts(a, b) {
+    return d3.ascending(format.parse(a), format.parse(b));
+  }
+
   var cohortsInOrder = [];
   $.each(rows, function(index, value) {
     if (shouldSkip(index, value)) {
@@ -181,9 +187,7 @@ function filterData(rows, groupType, groupValues, weekly) {
     cohortsInOrder.push(value[DAY_COLUMN]);
   });
   var format = d3.time.format("%m/%d/%y");
-  cohortsInOrder.sort(function(a, b) {
-    return d3.ascending(format.parse(a), format.parse(b));
-  });
+  cohortsInOrder.sort(compareCohorts);
 
   // Maps cohort key to the combined data row for the key. The data rows in
   // the values of this map have all cohort columns removed.
@@ -212,9 +216,10 @@ function filterData(rows, groupType, groupValues, weekly) {
     }
   });
 
-  // Sort cohort keys in ascending order.
+  // Sort cohort keys in ascending order. This is different than cohortsInOrder
+  // because it may be regrouped or bounded.
   var keys = $.map(cohorts, function(value, key) { return key; });
-  keys.sort();
+  keys.sort(compareCohorts);
 
   // Save some metadata about the cohorts.
   var rowData = [];
@@ -352,13 +357,16 @@ function updateViz(rows) {
 
   var bars = layers.selectAll('rect.bar').data(getValues);
   bars.enter().append('svg:rect')
-    .attr('class', 'bar')
-    .attr('width', barWidth)
-    .attr('x', getX)
-    .attr('y', getY)
-    .attr('height', getHeight);
-
-  bars.exit().remove();
+      .attr('class', 'bar')
+      .attr('x', scaleX(scaleX.domain()[1]))
+      .attr('y', getY)
+      .attr('width', barWidth)
+      .attr('height', getHeight)
+    .transition()
+      .duration(500)
+      .attr('width', barWidth)
+      .attr('x', getX)
+      .attr('y', getY);
 
   bars.transition()
     .duration(500)
@@ -367,18 +375,13 @@ function updateViz(rows) {
     .attr('width', barWidth)
     .attr('height', getHeight);
 
-  // Cohort date axis
-  var format = d3.time.format("%m/%d/%y");
-  // var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
-  // var range = viewCohorts.map(function(d, i) {
-  //   return scaleX(i) + barWidth / 2;
-  // });
-  // console.log(domain);
-  // console.log(range);
-  // var xAxisScale = d3.time.scale()
-  //   .domain(domain)
-  //   .range(range);
+  bars.exit().transition()
+    .duration(500)
+    .attr('width', 0)
+    .attr('x', width)
+    .remove();
 
+  // Cohort date axis
   function filterTicks(value, index) {
     // With very few ticks, show them all
     if (viewCohorts.length <= 5) {
@@ -392,7 +395,7 @@ function updateViz(rows) {
 
   var domain = viewCohorts.map(function(d) { return d.cohort; });
   var range = viewCohorts.map(function(d, i) {
-    return scaleX(i) + barWidth / 2;
+    return scaleX(i);
   });
   domain = domain.filter(filterTicks);
   range = range.filter(filterTicks);
