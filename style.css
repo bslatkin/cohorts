@@ -18,7 +18,10 @@
   width: 100%;
   text-align: left;
 }
-
+#viz_container td {
+  vertical-align: top;
+  width: 33%;
+}
 
 .viz-title {
   border: 0;
@@ -34,4 +37,16 @@
 .group-values-header {
   display: block;
   margin: 10px 0;
+}
+
+.legend-box {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  vertical-align: middle;
+  margin: 4px 8px;
+}
+.legend-label {
+  display: inline-block;
+  vertical-align: middle;
 }

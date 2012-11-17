@@ -7,6 +7,7 @@
   <script src="jquery.csv.min.js"></script>
   <script src="cohorts.js"></script>
   <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
+  <title>Cohort visualizer</title>
   <!--
       Copyright 2012 Brett Slatkin
 
@@ -30,14 +31,14 @@
 <table id="viz_container">
   <thead>
   <tr>
-    <th id="viz_title1" colspan="2">
+    <th id="viz_title1" colspan="3">
       <input class="viz-title" type="text" size="50" placeholder="Type a title here">
     </th>
   </tr>
   </thead>
 
   <tr>
-    <td id="viz_graph1" class="chart-cell" colspan="2">
+    <td id="viz_graph1" class="chart-cell" colspan="3">
       <svg class="stacked">
         <g></g>
       </svg>
@@ -53,9 +54,11 @@
       <input type="checkbox" name="normalize" id="normalize-check">
       <label for="normalize-check">Normalize cohorts</label>
     </td>
+    <td id="viz_legend"></td>
   </tr>
   <tr>
     <td id="viz_group_value1">Group values</td>
+    <td>&nbsp;</td>
     <td>&nbsp;</td>
   </tr>
 </table>

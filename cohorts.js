@@ -118,6 +118,26 @@ function createGroupValueCheckboxes(groupTypes) {
 }
 
 
+function createLegend(rowsWithHeader) {
+  var columnNames = rowsWithHeader[0].slice(3);
+  var container = $('#viz_legend');
+  container.empty();
+
+  var color = d3.scale.category20();
+  $.each(columnNames, function(index, value) {
+    var item = $('<div>');
+    $('<div class="legend-box">')
+        .attr('style', 'background-color: ' + color(index))
+        .appendTo(item);
+    $('<div class="legend-label">')
+        .text(value)
+        .appendTo(item);
+    // Reverse order to match graph stacking.
+    container.prepend(item);
+  });
+}
+
+
 function getCohort(cohortDay) {
   // TODO: Do date-based grouping with start/end times.
   return cohortDay;
@@ -344,6 +364,7 @@ function handleClickVisualize() {
   // Setup UI
   createGroupTypeRadios(groupTypes);
   createGroupValueCheckboxes(groupTypes);
+  createLegend(rowsWithHeader);
 
   // Register event handlers
   $(document).unbind('cohorts.viz');
