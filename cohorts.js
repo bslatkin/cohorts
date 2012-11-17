@@ -263,7 +263,7 @@ function updateViz(rows) {
   }
 
   // Put margins around the graphs so the axes render without clipping
-  var marginX = 30;
+  var marginX = 50;
   var marginY = 20;
   height -= 2 * marginY;
   width -= 2 * marginX;
@@ -353,6 +353,29 @@ function updateViz(rows) {
       .attr("class", "bottom axis")
       .attr("transform", "translate(0," + (height-marginY) + ")")
       .call(xAxis.orient("bottom"));
+
+  // Vertical axis
+  var yAxisScale = d3.time.scale()
+    .domain([0, maxY])
+    .range([height-marginY, marginY]);
+
+  var yAxis = d3.svg.axis().scale(yAxisScale);
+
+  if (normalized) {
+    yAxis = yAxis.tickFormat(d3.format("%"))
+        .tickSize(1)
+        .tickValues([0, 1]);
+  } else {
+    yAxis = yAxis.tickFormat(d3.format(",.0f"))
+        .ticks(5)
+        .tickSize(1);
+  }
+
+  chart.selectAll('g.left.axis').remove();
+
+  chart.append("g")
+      .attr("class", "left axis")
+      .call(yAxis.orient("left"));
 }
 
 
