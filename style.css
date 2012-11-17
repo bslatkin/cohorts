@@ -75,6 +75,20 @@ p, textarea, div {
   font-family: 'Sanchez', serif;
 }
 
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-size: 12px;
+}
+
+.bar {
+  shape-rendering: crispEdges;
+}
+
 .chart-cell {
 }
 

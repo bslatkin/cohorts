@@ -337,16 +337,22 @@ function updateViz(rows) {
 
   // Cohort date axis
   var format = d3.time.format("%m/%d/%y");
-  var scale = viewCohorts.map(function(d) { return format.parse(d.cohort); });
+  var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
+  var range = viewCohorts.map(function(d, i) { return scaleX(i + 0.5); });
   var xAxisScale = d3.time.scale()
-    .domain([scale[0], scale[scale.length - 1]])
-    .range([0, width]);
+    .domain(domain)
+    .range(range);
 
   var xAxis = d3.svg.axis()
       .scale(xAxisScale)
-      .ticks(d3.time.days)
-      .tickSize(1)
+      .tickSize(5, 2, 0)
+      .ticks(5)
       .tickFormat(format);
+
+  if (domain.length < 5) {
+    // With very few ticks, show only two
+    xAxis = xAxis.ticks(2);
+  }
 
   chart.selectAll('g.bottom.axis').remove();
 
@@ -364,11 +370,11 @@ function updateViz(rows) {
 
   if (normalized) {
     yAxis = yAxis.tickFormat(d3.format("%"))
-        .tickSize(1)
+        .tickSize(5, 0, 0)
         .tickValues([1]);
   } else {
     yAxis = yAxis.tickFormat(d3.format(",.0f"))
-        .tickSize(1)
+        .tickSize(5, 0, 0)
         .tickValues([maxY]);
   }
 
