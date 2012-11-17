@@ -2,37 +2,41 @@
 <html>
 <head>
   <meta charset="utf-8">
+
+  <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
+
   <script src="jquery-1.8.2.min.js"></script>
   <script src="d3.v2.min.js"></script>
   <script src="jquery.csv.min.js"></script>
   <script src="cohorts.js"></script>
-  <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
+
   <title>Cohort visualizer</title>
-  <!--
-      Copyright 2012 Brett Slatkin
 
-      Licensed under the Apache License, Version 2.0 (the "License");
-      you may not use this file except in compliance with the License.
-      You may obtain a copy of the License at
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-36415834-1']);
+    _gaq.push(['_trackPageview']);
 
-          http://www.apache.org/licenses/LICENSE-2.0
-
-      Unless required by applicable law or agreed to in writing, software
-      distributed under the License is distributed on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-      See the License for the specific language governing permissions and
-      limitations under the License.
-  -->
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
 </head>
-<body>
 
-<h1>Cohort visualizer</h1>
+<body class="fancy-bg">
+
+<div class="title-section">
+  <h1 class="main-title">Cohort Visualizer</h1>
+  <span class="sub-title">A handy tool for browsing cohorts</span>
+</div>
 
 <table id="viz_container">
   <thead>
   <tr>
     <th id="viz_title1" colspan="3">
-      <input class="viz-title" type="text" size="50" placeholder="Type a title here">
+      <input class="viz-title fancy-bg" type="text" size="50" placeholder="Enter a graph title here">
     </th>
   </tr>
   </thead>
@@ -45,31 +49,32 @@
     </td>
   </tr>
 
-  <tr>
+  <tr class="controls-section">
     <td>
       <div class="controls-header">Group types</div>
       <div id="viz_group_type1"></div>
+      <div id="viz_group_value1"></div>
     </td>
     <td>
       <div class="controls-header">
         Controls
       </div>
       <input type="checkbox" name="normalize" id="normalize-check">
-      <label for="normalize-check">Normalize cohorts</label>
+      <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
     </td>
-    <td id="viz_legend"></td>
-  </tr>
-  <tr>
-    <td id="viz_group_value1"></td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
+    <td>
+      <div class="controls-header">
+        Legend
+      </div>
+      <div id="viz_legend"></div>
+    </td>
   </tr>
 </table>
 
-<h1>Paste your CSV here</h2>
+<h2>Paste your CSV here</h2>
 <div>
   <p>
-    <strong>Note: No data will go to the server. This is all client-side in your browser.</strong>
+    Note: No data will go to the server. This is all client-side in your browser.
   </p>
   <p>
 
@@ -154,12 +159,12 @@ Total,,11/11/12,59,19,46,50,93
   </p>
   <p>
     Here's a simple example for a fake social network with "Sign-up Referrer",
-    "Favorite feature", and "Total" cohort groups. This only counts a user
-    towards one referrer for sign up row, one favorite feature row, and one
+    "Favorite feature", and "Total" cohort group types. This only counts a user
+    towards one sign-up referrer row, one favorite feature row, and one
     total row. In the case of "Total" the only valid grouping value is the empty
     string, which this tool treats specially.
 
-    <table>
+    <table class="example-table">
       <tr>
         <th>Cohort group type</th>
         <th>Cohort group value</th>
@@ -260,17 +265,69 @@ Total,,11/11/12,59,19,46,50,93
   </p>
 </div>
 
-<h1>More info</h1>
+<h1>Why cohort analysis?</h1>
 <div>
 <p>
-  Things to read to understand the motivation and method behind this:
+  A cohort is a group of people who share a common characteristic or experience
+  within a defined period (<a
+  href="http://en.wikipedia.org/wiki/Cohort_study">Wikipedia</a>). It's used a
+  lot in health to track how different groups of patients respond to disease and
+  medication. It can be used in business to track progress in the funnel.
+</p>
+<p>
+  For software and websites, cohorts are useful because they let you measure the
+  impact of your product changes over time. Simple example: Using cohorts you
+  can see the conversion rate of new users from two months ago and compare it to
+  new users of today. Ideally, this would let you judge if your software is
+  getting better over time, users are getting happier, etc. Sometimes you'll see
+  that things are getting worse.
+</p>
+<p>
+  Cohort analysis can apply to more than just users. For example, you could
+  treat a set of articles on a blog as the source dataset; the levels of traffic
+  or reshares could be mutually exclusive states; and you could treat common
+  tags as a group type, or author as a group type. This tool would let you drill
+  down and compare all of those groupings pretty easily.
+</p>
+<p>
+  One of the most interesting things about cohort analysis is the graphs change
+  over time. If you take a snapshot of your cohort data today and then take
+  another snapshot two months from now, you'll see that the older cohort bars
+  have changed. This happens because users who signed up two months ago remain
+  active and continue to make progress in your funnel over extended periods.
+  It's useful to save your cohort datasets after you collect them, so you can
+  compare to the past.
+</p>
+<p>
+  Other things to read to understand the motivation and method behind this:
   <ul>
     <li><a href="http://blog.kera.io/post/33745559146/cohort-analysis-metrics-for-a-scalable-business">Cohort Analysis: Metrics for a Scalable Business (kera.io)</a></li>
     <li><a href="http://www.avc.com/a_vc/2009/10/the-cohort-analysis.html">The Cohort Analysis (avc.com)</li>
-    <li><a href="http://www.onebigfluke.com/2012/10/doing-cohort-analysis-with-map-reduce.html">Doing Cohort Analysis with Map Reduce (my blog)</li>
+    <li><a href="http://www.onebigfluke.com/2012/10/doing-cohort-analysis-with-map-reduce.html">Doing Cohort Analysis with Map Reduce (my blog)</a></li>
   </ul>
 </p>
 </div>
 
+<h1>About</h1>
+<div>
+  <p>Copyright 2012 <a href="http://www.onebigfluke.com">Brett Slatkin</a></p>
+  <p>
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+  </p>
+  <p>
+    <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
+  </p>
+  <p>
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  </p>
+</div>
+
 </body>
 </html>
+

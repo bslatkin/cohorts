@@ -14,20 +14,65 @@
  * limitations under the License.
  */
 
-#viz_container {
-  width: 100%;
-  text-align: left;
+@font-face {
+  font-family: 'Sanchez';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Sanchez'), local('Sanchez-Regular'), url(sanchez-regular.woff) format('woff');
 }
-#viz_container td {
+
+@font-face {
+  font-family: 'Sanchez';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Sanchez Italic'), local('Sanchez-Italic'), url(sanchez-italic.woff) format('woff');
+}
+
+.fancy-bg {
+  background-image: url(daimond_eyes.png);
+}
+
+body {
+  font-family: 'Sanchez', serif;
+  font-size: 14px;
+}
+a:link, a:visited, a:active, a:hover {
+  color: #000;
+}
+
+.title-section {
+  margin: 0 0 20px 0;
+}
+.main-title {
+  display: inline;
+}
+.sub-title {
+  padding-left: 20px;
+}
+
+p, textarea, div {
+  max-width: 700px;
+}
+
+#viz_container {
+  margin: 0 auto 30px auto;
+  text-align: left;
+  padding: 0 10px;
+}
+.controls-section td {
   vertical-align: top;
   width: 33%;
+}
+#viz_graph1 {
+  text-align: center;
 }
 
 .viz-title {
   border: 0;
-  padding: 10px;
+  padding: 10px 4px;
   font-size: 18px;
   font-weight: bold;
+  font-family: 'Sanchez', serif;
 }
 
 .chart-cell {
@@ -47,4 +92,9 @@
 .legend-label {
   display: inline-block;
   vertical-align: middle;
+}
+
+.example-table td, .example-table th {
+  text-align: left;
+  padding: 0 10px;
 }

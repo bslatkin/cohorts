@@ -1,10 +1,11 @@
 P1
 - Make better generator data with categories
-- Restyle whole page
-- Min width doesn't work right
 
 P2
 - Add checkbox to group by week
 - Add info panel with detail of breakdown on hover
 - Filter for group values by regex
+
+P3
 - Checkbox to hide some cohorts (or a way to base each state at zero so you can see how each state is growing/changing over time)
+- Accept file upload or drag/drop of the CSV file

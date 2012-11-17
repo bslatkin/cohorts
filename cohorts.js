@@ -257,10 +257,11 @@ function updateViz(rows) {
 
   // Scale graph to whole window area, with minimum
   var height = 500;
-  var width = $('#viz_graph1').width();
-  if (width < 600) {
-    width = 600;
+  var width = $(window).width() - 100;
+  if (width < 500) {
+    width = 500;
   }
+  $('#viz_container').width(width);
 
   // Put margins around the graphs so the axes render without clipping
   var marginX = 50;
