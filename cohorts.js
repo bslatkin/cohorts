@@ -146,8 +146,8 @@ function createLegend(rowsWithHeader) {
 function getCohort(cohortDay, cohortsInOrder, weekly) {
   if (weekly) {
     var index = cohortsInOrder.indexOf(cohortDay);
-    var indexRounded = 7 * Math.floor(index / 7);
-    return cohortsInOrder[indexRounded];
+    var indexRounded = 6 * Math.floor(index / 7);
+    result = cohortsInOrder[indexRounded];
     return result;
   } else {
     return cohortDay;
@@ -216,28 +216,46 @@ function filterData(rows, groupType, groupValues, weekly) {
     }
   });
 
-  // Sort cohort keys in ascending order. This is different than cohortsInOrder
-  // because it may be regrouped or bounded.
-  var keys = $.map(cohorts, function(value, key) { return key; });
-  keys.sort(compareCohorts);
-
   // Save some metadata about the cohorts.
   var rowData = [];
-  $.each(keys, function(index, value) {
-    rowData.push({cohort: value, x: index, total: d3.sum(cohorts[value])});
+  $.each(cohortsInOrder, function(index, value) {
+    var valueList = cohorts[value];
+    var total = d3.sum(valueList || []);
+    rowData.push({
+      cohort: value,
+      x: index,
+      total: total,
+      show: !!valueList
+    });
   });
 
   // Now regroup the data as sets of points grouped by column (for D3).
   var columns = {};
   var headers = rows[0].slice(3);
-  $.each(cohorts, function(key, value) {
-    $.each(headers, function(index, header) {
+  $.each(cohortsInOrder, function(index, key) {
+    var columnValues = cohorts[key];
+    $.each(headers, function(columnIndex, header) {
       var data = columns[header];
       if (!data) {
         data = []
         columns[header] = data;
       }
-      data.push({cohort: key, x: keys.indexOf(key), y: value[index]});
+
+      if (!columnValues) {
+        data.push({
+          cohort: key,
+          x: cohortsInOrder.indexOf(key),
+          y: 0,
+          show: false
+        });
+      } else {
+        data.push({
+          cohort: key,
+          x: cohortsInOrder.indexOf(key),
+          y: columnValues[columnIndex],
+          show: true
+        });
+      }
     });
   });
 
@@ -288,9 +306,14 @@ function updateViz(rows) {
   view = filterData(rows, groupType, groupValues, weekly);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
-  // console.log('Filtered to: type="' + groupType +
-  //             '", values="' + (groupValues.join('|')) +
-  //             '"; ' + viewCohorts.length + ' rows found');
+
+  var realRows = viewCohorts.filter(function(value, index) {
+    return value.show;
+  });
+
+  console.log('Filtered to: type="' + groupType +
+              '", values="' + (groupValues.join('|')) +
+              '"; ' + realRows.length + ' rows found');
 
   // Scale graph to whole window area, with minimum
   var height = 500;
@@ -309,7 +332,7 @@ function updateViz(rows) {
   var scaleX = d3.scale.linear()
       .domain([0, viewCohorts.length])
       .range([0, width]);
-  var barWidth = width / viewCohorts.length;
+  var barWidth = width / realRows.length;
   var maxY = d3.max(viewCohorts, function(d) { return d.total; });
   if (normalized) {
     maxY = 1;
@@ -332,6 +355,14 @@ function updateViz(rows) {
   var getHeight = function(d) {
     return scaleY(d.y);
   };
+  var getWidth = function(d, i) {
+    if (d.show) {
+      return barWidth;
+    } else {
+      return 0;
+    }
+  };
+
   var getValues = function(d) { return d.values; };
 
   var chart = d3.select('#viz_graph1')
@@ -360,34 +391,30 @@ function updateViz(rows) {
       .attr('class', 'bar')
       .attr('x', scaleX(scaleX.domain()[1]))
       .attr('y', getY)
-      .attr('width', barWidth)
+      .attr('width', getWidth)
       .attr('height', getHeight)
     .transition()
       .duration(500)
-      .attr('width', barWidth)
+      .attr('width', getWidth)
       .attr('x', getX)
       .attr('y', getY);
 
   bars.transition()
-    .duration(500)
-    .attr('y', getY)
-    .attr('x', getX)
-    .attr('width', barWidth)
-    .attr('height', getHeight);
-
-  bars.exit().transition()
-    .duration(500)
-    .attr('width', 0)
-    .attr('x', width)
-    .remove();
+      .duration(500)
+      .attr('x', getX)
+      .attr('y', getY)
+      .attr('width', getWidth)
+      .attr('height', getHeight);
+  bars.exit().remove();
 
   // Cohort date axis
+  // TODO: Always include the last one!
   function filterTicks(value, index) {
     // With very few ticks, show them all
     if (viewCohorts.length <= 5) {
       return true;
     }
-    if (index % 8 == 0) {
+    if (index % 7 == 0) {
       return true;
     }
     return false;
