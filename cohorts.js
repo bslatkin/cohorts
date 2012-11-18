@@ -475,7 +475,7 @@ function updateViz(rows, cause) {
   // Vertical axis
   var yAxisScale = d3.time.scale()
     .domain([0, maxY])
-    .range([height-marginY, marginY]);
+    .range([height-marginY, 0]);
 
   var yAxis = d3.svg.axis().scale(yAxisScale);
 
