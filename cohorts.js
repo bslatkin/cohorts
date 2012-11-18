@@ -419,16 +419,16 @@ function updateViz(rows, cause) {
           .attr('x', getX)
           .attr('y', getY);
     }
-  } else if (cause == 'normalize') {
-    bars.transition()
-        .duration(500)
-        .attr('height', getHeight)
-        .attr('width', getWidth)
-        .attr('x', getX)
-        .attr('y', getY);
   } else if (cause == 'resize') {
     bars.transition()
         .duration(0)
+        .attr('width', getWidth)
+        .attr('x', getX)
+        .attr('y', getY);
+  } else {
+    bars.transition()
+        .duration(500)
+        .attr('height', getHeight)
         .attr('width', getWidth)
         .attr('x', getX)
         .attr('y', getY);
