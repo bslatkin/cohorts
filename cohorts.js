@@ -175,6 +175,7 @@ function filterData(rows, groupType, groupValues, weekly) {
   }
 
   // Extract the cohort days so we can do arbitrary time regroupings.
+  var format = d3.time.format("%m/%d/%y");
   function compareCohorts(a, b) {
     return d3.ascending(format.parse(a), format.parse(b));
   }
@@ -188,7 +189,6 @@ function filterData(rows, groupType, groupValues, weekly) {
       cohortsInOrder.push(cohortDay);
     }
   });
-  var format = d3.time.format("%m/%d/%y");
   cohortsInOrder.sort(compareCohorts);
 
 
@@ -303,7 +303,7 @@ function clearViz() {
 }
 
 
-function updateViz(rows) {
+function updateViz(rows, cause) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
   var normalized = getIsNormalized();
@@ -313,6 +313,7 @@ function updateViz(rows) {
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
+  console.log('Viz cause: ' + cause);
   console.log('Filtered to: type="' + groupType +
               '", values="' + (groupValues.join('|')) +
               '"; ' + viewCohorts.length + ' rows found');
@@ -360,19 +361,6 @@ function updateViz(rows) {
   var getWidth = function(d) {
     return barWidth * d.barWidth;
   };
-  var getWidthIntermediate = function(d) {
-    if (d.barWidth == 0) {
-      return barWidth;
-    }
-    return barWidth * d.barWidth;
-  };
-  var getStroke = function(d) {
-    if (d.barWidth == 0) {
-      return 'none';
-    }
-    return d3.rgb('#333');
-  };
-
   var getValues = function(d) { return d.values; };
 
   var chart = d3.select('#viz_graph1')
@@ -391,8 +379,7 @@ function updateViz(rows) {
   var layers = chart.selectAll('g.layer').data(stack);
   layers.enter().append('svg:g')
       .attr('class', 'layer')
-      .style('fill', getColor)
-      .style('stroke', d3.rgb('#333'));
+      .style('fill', getColor);
 
   layers.exit().remove();
 
@@ -400,60 +387,49 @@ function updateViz(rows) {
   bars.enter().append('svg:rect')
       .attr('class', 'bar')
       .attr('x', getX)
-      .attr('y', height - marginY) // TODO: Clean this up
-      .attr('width', getWidth)
-      .attr('height', 0)
-    .transition()
-      .duration(500)
-      .attr('width', getWidth)
-      .attr('height', getHeight)
-      .attr('x', getX)
-      .attr('y', getY);
-
-  bars.transition()
-      .duration(500)
-      .attr('x', getX)
       .attr('y', getY)
+      .attr('width', getWidth)
       .attr('height', getHeight)
-      .attr('stroke', 'none')
-    .transition()
-      .delay(0)
-      .attr('width', getWidthIntermediate)
-    .transition()
-      .delay(500)
-      .duration(0)
-      .attr('stroke', getStroke)
-      .attr('width', getWidth);
+      .attr('stroke', d3.rgb('#333'));
+
+  // Transition to weekly
+  if (weekly) {
+    bars.transition()
+        .duration(500)
+        .attr('height', getHeight)
+        .attr('x', getX)
+        .attr('y', getY)
+      .transition()
+        .delay(750)
+        .duration(0)
+        .attr('width', getWidth);
+  } else {
+    bars.transition()
+        .duration(0)
+        .attr('width', getWidth)
+      .transition()
+        .delay(250)
+        .duration(500)
+        .attr('height', getHeight)
+        .attr('x', getX)
+        .attr('y', getY);
+  }
 
   bars.exit().remove();
 
   // Cohort date axis
-  // TODO: Always include the last one!
-  function filterTicks(value, index) {
-    // With very few ticks, show them all
-    if (viewCohorts.length <= 5) {
-      return true;
-    }
-    if (index % 7 == 0) {
-      return true;
-    }
-    return false;
-  };
+  var format = d3.time.format("%m/%d/%y");
+  var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
 
-  var domain = viewCohorts.map(function(d) { return d.cohort; });
-  var range = viewCohorts.map(function(d, i) {
-    return scaleX(i);
-  });
-  domain = domain.filter(filterTicks);
-  range = range.filter(filterTicks);
-
-  var xAxisScale = d3.scale.ordinal()
-    .domain(domain)
-    .range(range);
+  var xAxisScale = d3.time.scale()
+    .domain([domain[0], domain[domain.length-1]])
+    .range([0, width]);
 
   var xAxis = d3.svg.axis()
       .scale(xAxisScale)
-      .tickSize(5, 2, 0);
+      .ticks(6)
+      .tickSize(5, 2, 5)
+      .tickFormat(format);
 
   chart.selectAll('g.bottom.axis').remove();
 
@@ -471,11 +447,11 @@ function updateViz(rows) {
 
   if (normalized) {
     yAxis = yAxis.tickFormat(d3.format("%"))
-        .tickSize(5, 0, 0)
+        .tickSize(5, 0, 5)
         .tickValues([1]);
   } else {
     yAxis = yAxis.tickFormat(d3.format(",.0f"))
-        .tickSize(5, 0, 0)
+        .tickSize(5, 0, 5)
         .tickValues([maxY]);
   }
 
@@ -499,8 +475,8 @@ function handleClickVisualize() {
 
   // Register event handlers
   $(document).unbind('cohorts.viz');
-  $(document).bind('cohorts.viz', function() {
-    updateViz(rowsWithHeader);
+  $(document).bind('cohorts.viz', function(e, cause) {
+    updateViz(rowsWithHeader, cause);
   });
 
   // Clear any existing chart
@@ -514,14 +490,16 @@ function handleClickVisualize() {
 function init() {
   $('#visualize_my_data').click(handleClickVisualize);
 
-  var trigger = function() {
-    $(document).trigger('cohorts.viz');
+  var trigger = function(cause) {
+    return function() {
+      $(document).trigger('cohorts.viz', cause);
+    };
   };
 
-  $('#normalize-check').click(trigger);
-  $('#weekly-check').click(trigger)
+  $('#normalize-check').click(trigger('normalize'));
+  $('#weekly-check').click(trigger('weekly'));
 
-  $(window).resize(trigger);
+  $(window).resize(trigger('resize'));
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
