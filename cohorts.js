@@ -313,8 +313,7 @@ function updateViz(rows, cause) {
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
-  console.log('Viz cause: ' + cause);
-  console.log('Filtered to: type="' + groupType +
+  console.log('Cause="' + cause + '", Filtered to: type="' + groupType +
               '", values="' + (groupValues.join('|')) +
               '"; ' + viewCohorts.length + ' rows found');
 
@@ -392,25 +391,39 @@ function updateViz(rows, cause) {
       .attr('height', getHeight)
       .attr('stroke', d3.rgb('#333'));
 
-  // Transition to weekly
-  if (weekly) {
+  if (cause == 'weekly') {
+    if (weekly) {
+      bars.transition()
+          .duration(500)
+          .attr('height', getHeight)
+          .attr('x', getX)
+          .attr('y', getY)
+        .transition()
+          .delay(750)
+          .duration(0)
+          .attr('width', getWidth);
+    } else {
+      bars.transition()
+          .duration(0)
+          .attr('width', getWidth)
+        .transition()
+          .delay(250)
+          .duration(500)
+          .attr('height', getHeight)
+          .attr('x', getX)
+          .attr('y', getY);
+    }
+  } else if (cause == 'normalize') {
     bars.transition()
         .duration(500)
         .attr('height', getHeight)
+        .attr('width', getWidth)
         .attr('x', getX)
-        .attr('y', getY)
-      .transition()
-        .delay(750)
-        .duration(0)
-        .attr('width', getWidth);
-  } else {
+        .attr('y', getY);
+  } else if (cause == 'resize') {
     bars.transition()
         .duration(0)
         .attr('width', getWidth)
-      .transition()
-        .delay(250)
-        .duration(500)
-        .attr('height', getHeight)
         .attr('x', getX)
         .attr('y', getY);
   }
