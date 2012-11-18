@@ -169,14 +169,12 @@ function createLegend(rowsWithHeader) {
 function clearInfoPanel() {
   $('.legend-value').text('');
   $('.legend-percentage').text('');
-  $('.legend-target').text('');
+  $('.legend-target').attr('data-target', '').text('');
   $('.legend-table').addClass('inactive');
 
   // Reset the state of all cohort bars to unhighlighted if
   // we're clearing the info panel.
-  $('rect[class="bar"]')
-      .attr('fill-opacity', '1')
-      .attr('data-highlight', '');
+  $('rect[class="bar"]').attr('fill-opacity', '1');
 }
 
 
@@ -188,26 +186,22 @@ function handleInfoPanel(e) {
 
 function updateInfoPanel(cohort) {
   if (!cohort) {
-    // Cohort wasn't supplied. Try to find it by scanning for highlighted bars.
-    var highlighted = $('rect[data-highlight="1"]');
-    if (highlighted.size() == 0) {
+    // Cohort wasn't supplied. Use whatever value is in the legend.
+    cohort = $('.legend-target').attr('data-target');
+    if (!cohort) {
       return;
     }
-    cohort = highlighted.attr('data-cohort');
   }
 
   // Reset the state of all cohort bars to unhighlighted if
   // we're entering a new bar. Otherwise, leave the last bar
   // highlighted
-  $('rect[class="bar"]')
-      .attr('fill-opacity', '1')
-      .attr('data-highlight', '');
+  $('rect[class="bar"]').attr('fill-opacity', '1');
 
   var cohortBars = $('rect[data-cohort="' + cohort + '"]');
-  cohortBars
-      .attr('fill-opacity', '0.8')
-      .attr('data-highlight', '1');
+  cohortBars.attr('fill-opacity', '0.8');
 
+  $('.legend-target').attr('data-target', cohort);
   $('.legend-target').text(' - ' + cohort);
   $('.legend-table').removeClass('inactive');
 
@@ -482,7 +476,11 @@ function updateViz(rows, cause) {
   }
   stack = stack.values(getValues)(viewBarGroups);
 
+  // Update the UI after the 'data-state-count' transitions are done.
+  chart.transition().each('end', updateUi);
+
   var layers = chart.selectAll('g.layer').data(stack);
+
   layers.enter().append('svg:g')
       .attr('class', 'layer')
       .style('fill', getColor);
@@ -504,6 +502,9 @@ function updateViz(rows, cause) {
   if (cause == 'weekly') {
     if (weekly) {
       bars.transition()
+          .duration(0)
+          .attr('data-state-count', getStateCount)
+        .transition()
           .duration(500)
           .attr('height', getHeight)
           .attr('x', getX)
@@ -512,38 +513,35 @@ function updateViz(rows, cause) {
           .delay(750)
           .duration(0)
           .attr('width', getWidth)
-          .attr('data-state-count', getStateCount)
-          .each('end', updateUi);
     } else {
       bars.transition()
           .duration(0)
+          .attr('data-state-count', getStateCount)
           .attr('width', getWidth)
         .transition()
           .delay(250)
           .duration(500)
           .attr('height', getHeight)
           .attr('x', getX)
-          .attr('y', getY)
-          .attr('data-state-count', getStateCount)
-          .each('end', updateUi);
+          .attr('y', getY);
     }
   } else if (cause == 'resize') {
     bars.transition()
         .duration(0)
+        .attr('data-state-count', getStateCount)
         .attr('width', getWidth)
         .attr('x', getX)
-        .attr('y', getY)
-        .attr('data-state-count', getStateCount)
-        .each('end', updateUi);
+        .attr('y', getY);
   } else {
     bars.transition()
+        .duration(0)
+        .attr('data-state-count', getStateCount)
+      .transition()
         .duration(500)
         .attr('height', getHeight)
         .attr('width', getWidth)
         .attr('x', getX)
-        .attr('y', getY)
-        .attr('data-state-count', getStateCount)
-        .each('end', updateUi);
+        .attr('y', getY);
   }
 
   bars.exit().remove();

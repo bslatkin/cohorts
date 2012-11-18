@@ -41,7 +41,7 @@ group_types = [
   ('Favorite feature', ['Chat', 'Reading news', 'Fun facts', 'Polls']),
 ]
 
-duration = 30
+duration = 180
 step = math.pi / duration / 2
 wave_start = {}
 wave_size = {}
