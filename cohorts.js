@@ -342,7 +342,7 @@ function updateViz(rows, cause) {
 
   var scaleY = d3.scale.linear()
       .domain([0, maxY])
-      .range([marginY, height - (2 * marginY)]);
+      .range([0, height - marginY]);
   var scaleColor = d3.scale.category20();
 
   var getColor = function(d, i) {
@@ -360,7 +360,12 @@ function updateViz(rows, cause) {
   var getWidth = function(d) {
     return barWidth * d.barWidth;
   };
-  var getValues = function(d) { return d.values; };
+  var getValues = function(d) {
+    return d.values;
+  };
+  var getCohort = function(d) {
+    return d.cohort;
+  };
 
   var chart = d3.select('#viz_graph1')
       .select('svg.stacked')
@@ -385,6 +390,7 @@ function updateViz(rows, cause) {
   var bars = layers.selectAll('rect.bar').data(getValues);
   bars.enter().append('svg:rect')
       .attr('class', 'bar')
+      .attr('data-cohort', getCohort)
       .attr('x', getX)
       .attr('y', getY)
       .attr('width', getWidth)
@@ -431,24 +437,28 @@ function updateViz(rows, cause) {
   bars.exit().remove();
 
   // Cohort date axis
-  var format = d3.time.format("%m/%d/%y");
-  var domain = viewCohorts.map(function(d) { return format.parse(d.cohort); });
+  var targetTicks = 2 + Math.ceil(viewCohorts.length / 7);
+  var domain = viewCohorts.map(function(d) { return d.cohort; });
+  var range = viewCohorts.map(function(d) { return scaleX(d.x); });
+  function filterTicks(value, index) {
+    return index % targetTicks == 0;
+  }
+  domain = domain.filter(filterTicks);
+  range = range.filter(filterTicks);
 
-  var xAxisScale = d3.time.scale()
-    .domain([domain[0], domain[domain.length-1]])
-    .range([0, width]);
+  var xAxisScale = d3.scale.ordinal()
+    .domain(domain)
+    .range(range);
 
   var xAxis = d3.svg.axis()
       .scale(xAxisScale)
-      .ticks(6)
-      .tickSize(5, 2, 5)
-      .tickFormat(format);
+      .tickSize(5, 2, 5);
 
   chart.selectAll('g.bottom.axis').remove();
 
   chart.append("g")
       .attr("class", "bottom axis")
-      .attr("transform", "translate(0," + (height-marginY) + ")")
+      .attr("transform", "translate(0," + (height - marginY) + ")")
       .call(xAxis.orient("bottom"));
 
   // Vertical axis
