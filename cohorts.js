@@ -128,22 +128,76 @@ function createLegend(rowsWithHeader) {
   var container = $('#viz_legend');
   container.empty();
 
+  var legendTable = $('<table class="legend-table">');
+
   var color = d3.scale.category20();
   $.each(columnNames, function(index, value) {
-    var item = $('<div>');
+    var row = $('<tr class="legend-row">')
+        .attr('data-state-name', value);
+    var legendBox = $('<td>');
     $('<div class="legend-box">')
         .attr('style', 'background-color: ' + color(index))
-        .appendTo(item);
-    $('<div class="legend-label">')
+        .appendTo(legendBox);
+    legendBox.appendTo(row);
+    $('<td class="legend-label">')
         .text(value)
-        .appendTo(item);
+        .appendTo(row);
+    $('<td class="legend-value">')
+        .appendTo(row);
+    $('<td class="legend-percentage">')
+        .appendTo(row);
     // Reverse order to match graph stacking.
-    container.prepend(item);
+    legendTable.prepend(row);
   });
 
-  // TODO: Add N=X and percentages to the legend. Use this selector:
-  // $('rect[data-cohort="11/08/12"]') to find a whole vertical part of the
-  // chart. Do some math. Populate the legend.
+  container.append(legendTable);
+}
+
+
+function clearInfoPanel() {
+  $('.legend-value').text('');
+  $('.legend-percentage').text('');
+
+  // Reset the state of all cohort bars to unhighlighted if
+  // we're clearing the info panel.
+  $('rect[class="bar"]').attr('fill-opacity', '1');
+}
+
+
+function handleInfoPanel(e) {
+  var entering = e.type == 'mouseenter';
+  if (!entering) {
+    return;
+  }
+
+  var cohort = $(e.currentTarget).attr('data-cohort');
+  var cohortBars = $('rect[data-cohort="' + cohort + '"]');
+
+  // Reset the state of all cohort bars to unhighlighted if
+  // we're entering a new bar. Otherwise, leave the last bar
+  // highlighted
+  $('rect[class="bar"]').attr('fill-opacity', '1');
+  cohortBars.attr('fill-opacity', '0.8');
+
+  // Figure out the denominator for percentages
+  var total = 0;
+  $.each(cohortBars, function(index, value) {
+    var el = $(value);
+    var stateCount = parseInt(el.attr('data-state-count'));
+    total += stateCount;
+  });
+
+  // Update each legend item to match the highlighted bar
+  var format = d3.format('%');
+  $.each(cohortBars, function(index, value) {
+    var el = $(value);
+    var stateName = el.attr('data-state-name');
+    var stateCount = el.attr('data-state-count');
+    var legendRow = $('.legend-row[data-state-name="' + stateName + '"]');
+    var percentage = format(stateCount / total);
+    legendRow.find('.legend-value').text(stateCount);
+    legendRow.find('.legend-percentage').text(percentage);
+  });
 }
 
 
@@ -263,7 +317,8 @@ function filterData(rows, groupType, groupValues, weekly) {
         cohort: key,
         x: cohortsInOrder.indexOf(key),
         y: columnValues[columnIndex],
-        barWidth: cohortWidth[key] || 0
+        barWidth: cohortWidth[key] || 0,
+        stateName: header
       };
       data.push(point);
     });
@@ -374,7 +429,7 @@ function updateViz(rows, cause) {
     return d.y;
   };
   var getStateName = function(d) {
-    return d.header;
+    return d.stateName;
   };
 
   var chart = d3.select('#viz_graph1')
@@ -402,6 +457,7 @@ function updateViz(rows, cause) {
       .attr('class', 'bar')
       .attr('data-cohort', getCohort)
       .attr('data-state-count', getStateCount)
+      .attr('data-state-name', getStateName)
       .attr('x', getX)
       .attr('y', getY)
       .attr('width', getWidth)
@@ -532,8 +588,14 @@ function init() {
 
   $('#normalize-check').click(trigger('normalize'));
   $('#weekly-check').click(trigger('weekly'));
+  $('#weekly-check').click(clearInfoPanel);
 
   $(window).resize(trigger('resize'));
+
+  // SVG's "class" attribute is not .className, but something else:
+  // See http://stackoverflow.com/a/5875087
+  $(document)
+    .on('mouseenter mouseleave', 'rect[class="bar"]', handleInfoPanel);
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
