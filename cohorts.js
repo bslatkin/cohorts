@@ -140,6 +140,10 @@ function createLegend(rowsWithHeader) {
     // Reverse order to match graph stacking.
     container.prepend(item);
   });
+
+  // TODO: Add N=X and percentages to the legend. Use this selector:
+  // $('rect[data-cohort="11/08/12"]') to find a whole vertical part of the
+  // chart. Do some math. Populate the legend.
 }
 
 
@@ -366,6 +370,12 @@ function updateViz(rows, cause) {
   var getCohort = function(d) {
     return d.cohort;
   };
+  var getStateCount = function(d) {
+    return d.y;
+  };
+  var getStateName = function(d) {
+    return d.header;
+  };
 
   var chart = d3.select('#viz_graph1')
       .select('svg.stacked')
@@ -391,6 +401,7 @@ function updateViz(rows, cause) {
   bars.enter().append('svg:rect')
       .attr('class', 'bar')
       .attr('data-cohort', getCohort)
+      .attr('data-state-count', getStateCount)
       .attr('x', getX)
       .attr('y', getY)
       .attr('width', getWidth)
