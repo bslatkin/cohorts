@@ -97,6 +97,10 @@ p, textarea, div {
   margin: 10px 0;
 }
 
+
+.legend-target {
+  display: inline;
+}
 .legend-table td {
   vertical-align: middle;
 }

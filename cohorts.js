@@ -157,27 +157,45 @@ function createLegend(rowsWithHeader) {
 function clearInfoPanel() {
   $('.legend-value').text('');
   $('.legend-percentage').text('');
+  $('.legend-target').text('');
 
   // Reset the state of all cohort bars to unhighlighted if
   // we're clearing the info panel.
-  $('rect[class="bar"]').attr('fill-opacity', '1');
+  $('rect[class="bar"]')
+      .attr('fill-opacity', '1')
+      .attr('data-highlight', '');
 }
 
 
 function handleInfoPanel(e) {
-  var entering = e.type == 'mouseenter';
-  if (!entering) {
-    return;
-  }
-
   var cohort = $(e.currentTarget).attr('data-cohort');
-  var cohortBars = $('rect[data-cohort="' + cohort + '"]');
+  updateInfoPanel(cohort);
+}
+
+
+function updateInfoPanel(cohort) {
+  if (!cohort) {
+    // Cohort wasn't supplied. Try to find it by scanning for highlighted bars.
+    var highlighted = $('rect[data-highlight="1"]');
+    if (highlighted.size() == 0) {
+      return;
+    }
+    cohort = highlighted.attr('data-cohort');
+  }
 
   // Reset the state of all cohort bars to unhighlighted if
   // we're entering a new bar. Otherwise, leave the last bar
   // highlighted
-  $('rect[class="bar"]').attr('fill-opacity', '1');
-  cohortBars.attr('fill-opacity', '0.8');
+  $('rect[class="bar"]')
+      .attr('fill-opacity', '1')
+      .attr('data-highlight', '');
+
+  var cohortBars = $('rect[data-cohort="' + cohort + '"]');
+  cohortBars
+      .attr('fill-opacity', '0.8')
+      .attr('data-highlight', '1');
+
+  $('.legend-target').text(' - ' + cohort);
 
   // Figure out the denominator for percentages
   var total = 0;
@@ -194,9 +212,8 @@ function handleInfoPanel(e) {
     var stateName = el.attr('data-state-name');
     var stateCount = el.attr('data-state-count');
     var legendRow = $('.legend-row[data-state-name="' + stateName + '"]');
-    var percentage = format(stateCount / total);
     legendRow.find('.legend-value').text(stateCount);
-    legendRow.find('.legend-percentage').text(percentage);
+    legendRow.find('.legend-percentage').text(format(stateCount / total));
   });
 }
 
@@ -313,11 +330,13 @@ function filterData(rows, groupType, groupValues, weekly) {
         data = []
         columns[header] = data;
       }
+      var stateCount = columnValues[columnIndex];
       var point = {
         cohort: key,
         x: cohortsInOrder.indexOf(key),
-        y: columnValues[columnIndex],
+        y: stateCount,
         barWidth: cohortWidth[key] || 0,
+        stateCount: stateCount,  // d3 will modify 'y' but not this
         stateName: header
       };
       data.push(point);
@@ -372,9 +391,9 @@ function updateViz(rows, cause) {
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
-  console.log('Cause="' + cause + '", Filtered to: type="' + groupType +
-              '", values="' + (groupValues.join('|')) +
-              '"; ' + viewCohorts.length + ' rows found');
+  // console.log('Cause="' + cause + '", Filtered to: type="' + groupType +
+  //             '", values="' + (groupValues.join('|')) +
+  //             '"; ' + viewCohorts.length + ' rows found');
 
   // Scale graph to whole window area, with minimum
   var height = 500;
@@ -426,11 +445,14 @@ function updateViz(rows, cause) {
     return d.cohort;
   };
   var getStateCount = function(d) {
-    return d.y;
+    return d.stateCount;
   };
   var getStateName = function(d) {
     return d.stateName;
   };
+  var updateUi = function(e) {
+    updateInfoPanel(null);
+  }
 
   var chart = d3.select('#viz_graph1')
       .select('svg.stacked')
@@ -471,40 +493,42 @@ function updateViz(rows, cause) {
           .attr('height', getHeight)
           .attr('x', getX)
           .attr('y', getY)
-          .attr('data-cohort', getCohort)
-          .attr('data-state-count', getStateCount)
-          .attr('data-state-name', getStateName)
         .transition()
           .delay(750)
           .duration(0)
-          .attr('width', getWidth);
+          .attr('width', getWidth)
+          .attr('data-state-count', getStateCount)
+          .each('end', updateUi);
     } else {
       bars.transition()
           .duration(0)
           .attr('width', getWidth)
-          .attr('data-cohort', getCohort)
-          .attr('data-state-count', getStateCount)
-          .attr('data-state-name', getStateName)
         .transition()
           .delay(250)
           .duration(500)
           .attr('height', getHeight)
           .attr('x', getX)
-          .attr('y', getY);
+          .attr('y', getY)
+          .attr('data-state-count', getStateCount)
+          .each('end', updateUi);
     }
   } else if (cause == 'resize') {
     bars.transition()
         .duration(0)
         .attr('width', getWidth)
         .attr('x', getX)
-        .attr('y', getY);
+        .attr('y', getY)
+        .attr('data-state-count', getStateCount)
+        .each('end', updateUi);
   } else {
     bars.transition()
         .duration(500)
         .attr('height', getHeight)
         .attr('width', getWidth)
         .attr('x', getX)
-        .attr('y', getY);
+        .attr('y', getY)
+        .attr('data-state-count', getStateCount)
+        .each('end', updateUi);
   }
 
   bars.exit().remove();
@@ -600,8 +624,7 @@ function init() {
 
   // SVG's "class" attribute is not .className, but something else:
   // See http://stackoverflow.com/a/5875087
-  $(document)
-    .on('mouseenter mouseleave', 'rect[class="bar"]', handleInfoPanel);
+  $(document).on('mouseenter', 'rect[class="bar"]', handleInfoPanel);
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
