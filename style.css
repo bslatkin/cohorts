@@ -121,6 +121,11 @@ p, textarea, div {
   font-size: 12px;
 }
 .legend-value {
+}
+.inactive .legend-total {
+  visibility: hidden;
+}
+.legend-total {
   font-weight: bold;
 }
 

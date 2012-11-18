@@ -128,7 +128,7 @@ function createLegend(rowsWithHeader) {
   var container = $('#viz_legend');
   container.empty();
 
-  var legendTable = $('<table class="legend-table">');
+  var legendTable = $('<table class="legend-table inactive">');
 
   var color = d3.scale.category20();
   $.each(columnNames, function(index, value) {
@@ -150,6 +150,18 @@ function createLegend(rowsWithHeader) {
     legendTable.prepend(row);
   });
 
+  // Add a row for the totals
+  var row = $('<tr class="legend-total">');
+  $('<td>').html('&nbsp;').appendTo(row);
+  $('<td class="legend-label">')
+      .text('Total')
+      .appendTo(row);
+  $('<td class="legend-value">')
+      .appendTo(row);
+  $('<td class="legend-percentage">')
+      .appendTo(row);
+  legendTable.append(row);
+
   container.append(legendTable);
 }
 
@@ -158,6 +170,7 @@ function clearInfoPanel() {
   $('.legend-value').text('');
   $('.legend-percentage').text('');
   $('.legend-target').text('');
+  $('.legend-table').addClass('inactive');
 
   // Reset the state of all cohort bars to unhighlighted if
   // we're clearing the info panel.
@@ -196,6 +209,7 @@ function updateInfoPanel(cohort) {
       .attr('data-highlight', '1');
 
   $('.legend-target').text(' - ' + cohort);
+  $('.legend-table').removeClass('inactive');
 
   // Figure out the denominator for percentages
   var total = 0;
@@ -204,6 +218,7 @@ function updateInfoPanel(cohort) {
     var stateCount = parseInt(el.attr('data-state-count'));
     total += stateCount;
   });
+  $('.legend-total>.legend-value').text(total);
 
   // Update each legend item to match the highlighted bar
   var format = d3.format('%');
