@@ -167,6 +167,7 @@ function createLegend(rowsWithHeader) {
 
 
 function clearInfoPanel() {
+  $('.legend-row').removeClass('highlighted');
   $('.legend-value').text('');
   $('.legend-percentage').text('');
   $('.legend-target').attr('data-target', '').text('');
@@ -179,12 +180,19 @@ function clearInfoPanel() {
 
 
 function handleInfoPanel(e) {
-  var cohort = $(e.currentTarget).attr('data-cohort');
-  updateInfoPanel(cohort);
+  if (e.type == 'mouseenter') {
+    var el = $(e.currentTarget);
+    var cohort = el.attr('data-cohort');
+    var stateName = el.attr('data-state-name');
+    updateInfoPanel(cohort, stateName);
+  } else {
+    // On mouse out, clear the highlighted row in the legend.
+    $('.legend-row').removeClass('highlighted');
+  }
 }
 
 
-function updateInfoPanel(cohort) {
+function updateInfoPanel(cohort, highlightStateName) {
   if (!cohort) {
     // Cohort wasn't supplied. Use whatever value is in the legend.
     cohort = $('.legend-target').attr('data-target');
@@ -201,6 +209,7 @@ function updateInfoPanel(cohort) {
   var cohortBars = $('rect[data-cohort="' + cohort + '"]');
   cohortBars.attr('fill-opacity', '0.8');
 
+  // Reset the legend
   $('.legend-target').attr('data-target', cohort);
   $('.legend-target').text(' - ' + cohort);
   $('.legend-table').removeClass('inactive');
@@ -220,9 +229,15 @@ function updateInfoPanel(cohort) {
     var el = $(value);
     var stateName = el.attr('data-state-name');
     var stateCount = el.attr('data-state-count');
+    var percent = total ? stateCount / total : 0;
     var legendRow = $('.legend-row[data-state-name="' + stateName + '"]');
     legendRow.find('.legend-value').text(stateCount);
-    legendRow.find('.legend-percentage').text(format(stateCount / total));
+    legendRow.find('.legend-percentage').text(format(percent));
+
+    // Highlight this row if necessary.
+    if (highlightStateName == stateName) {
+      legendRow.addClass('highlighted');
+    }
   });
 }
 
@@ -460,7 +475,7 @@ function updateViz(rows, cause) {
     return d.stateName;
   };
   var updateUi = function(e) {
-    updateInfoPanel(null);
+    updateInfoPanel(null, null);
   }
 
   var chart = d3.select('#viz_graph1')
@@ -637,7 +652,7 @@ function init() {
 
   // SVG's "class" attribute is not .className, but something else:
   // See http://stackoverflow.com/a/5875087
-  $(document).on('mouseenter', 'rect[class="bar"]', handleInfoPanel);
+  $(document).on('mouseenter mouseleave', 'rect[class="bar"]', handleInfoPanel);
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
