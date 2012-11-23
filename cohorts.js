@@ -193,6 +193,7 @@ function handleInfoPanel(e) {
 
 
 function updateInfoPanel(cohort, highlightStateName) {
+  var legend = $('#viz_legend');
   if (!cohort) {
     // Cohort wasn't supplied. Use whatever value is in the legend.
     cohort = $('.legend-target').attr('data-target');
@@ -201,10 +202,14 @@ function updateInfoPanel(cohort, highlightStateName) {
     }
   }
 
-  // Reset the state of all cohort bars to unhighlighted if
-  // we're entering a new bar. Otherwise, leave the last bar
-  // highlighted
-  $('rect[class="bar"]').attr('fill-opacity', '1');
+  // Reset the state of the last cohort bars.
+  var lastCohort = $('.legend-target').attr('data-target');
+  if (lastCohort != cohort) {
+    // Reset the state of the old cohort bars to unhighlighted if
+    // we're entering a new bar. Otherwise, leave the last bar
+    // highlighted.
+    $('rect[data-cohort="' + lastCohort + '"]').attr('fill-opacity', '1');
+  }
 
   var cohortBars = $('rect[data-cohort="' + cohort + '"]');
   cohortBars.attr('fill-opacity', '0.8');
@@ -221,16 +226,17 @@ function updateInfoPanel(cohort, highlightStateName) {
     var stateCount = parseInt(el.attr('data-state-count'));
     total += stateCount;
   });
-  $('.legend-total>.legend-value').text(total);
+  legend.find('.legend-total>.legend-value').text(total);
 
   // Update each legend item to match the highlighted bar
   var format = d3.format('%');
   $.each(cohortBars, function(index, value) {
     var el = $(value);
     var stateName = el.attr('data-state-name');
-    var stateCount = el.attr('data-state-count');
+    var stateCount = el.attr('data-state-count') || 0;
     var percent = total ? stateCount / total : 0;
-    var legendRow = $('.legend-row[data-state-name="' + stateName + '"]');
+    var legendRow = legend
+        .find('.legend-row[data-state-name="' + stateName + '"]');
     legendRow.find('.legend-value').text(stateCount);
     legendRow.find('.legend-percentage').text(format(percent));
 
@@ -348,6 +354,7 @@ function filterData(rows, groupType, groupValues, weekly) {
     var cohortGrouping = getCohort(key, cohortsInOrder, weekly);
     var columnValues = cohorts[cohortGrouping];
 
+    // TODO: This is slow
     $.each(headers, function(columnIndex, header) {
       var data = columns[header];
       if (!data) {

@@ -20,11 +20,11 @@ import csv
 import datetime
 import math
 import random
+import string
 import sys
 
 
-out = csv.writer(sys.stdout)
-out.writerow([
+COLUMNS = [
   'Cohort group type',
   'Cohort group value',
   'Cohort day',
@@ -33,15 +33,20 @@ out.writerow([
   'Sent first message',
   'Unlocked first achievement',
   'Made two posts',
-])
+] + ['State ' + a for a in string.ascii_lowercase]
+
+
+out = csv.writer(sys.stdout)
+out.writerow(COLUMNS)
 
 group_types = [
   ('Total', ['']),
   ('Sign-up referrer', ['Email', 'Search', 'Coupon', 'Tweet']),
   ('Favorite feature', ['Chat', 'Reading news', 'Fun facts', 'Polls']),
+  ('Big Random', ['Value ' + a for a in string.ascii_lowercase]),
 ]
 
-duration = 180
+duration = 300
 step = math.pi / duration / 2
 wave_start = {}
 wave_size = {}
@@ -69,13 +74,12 @@ for type_number, group in enumerate(group_types):
       cohort_day = start + datetime.timedelta(days=x)
       cohort = cohort_day.strftime('%m/%d/%y')
 
-      out.writerow([
+      row = [
         group_type,
         group_value,
         cohort,
-        do_wave(wave_index, x),
-        do_wave(wave_index + 1, x),
-        do_wave(wave_index + 2, x),
-        do_wave(wave_index + 3, x),
-        do_wave(wave_index + 4, x),
-      ])
+      ]
+      for i in xrange(len(COLUMNS) - 3):
+        row.append(do_wave(wave_index + i, x))
+
+      out.writerow(row)
