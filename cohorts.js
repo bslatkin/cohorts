@@ -277,6 +277,7 @@ function filterData(rows, groupType, groupValues, weekly) {
         groupValues.indexOf(value[GROUP_VALUE_COLUMN]) == -1) {
       return true;
     }
+    return false;
   }
 
   // Extract the cohort days so we can do arbitrary time regroupings.
@@ -284,18 +285,21 @@ function filterData(rows, groupType, groupValues, weekly) {
   function compareCohorts(a, b) {
     return d3.ascending(format.parse(a), format.parse(b));
   }
-  var cohortsInOrder = [];
+  var cohortsSet = {};
   $.each(rows, function(index, value) {
     if (shouldSkip(index, value)) {
       return;
     }
     var cohortDay = value[DAY_COLUMN];
-    if (cohortsInOrder.indexOf(cohortDay) == -1) {
-      cohortsInOrder.push(cohortDay);
+    if (!(cohortDay in cohortsSet)) {
+      cohortsSet[cohortDay] = 1;
     }
   });
+  var cohortsInOrder = []
+  $.each(cohortsSet, function(key, value) {
+    cohortsInOrder.push(key);
+  });
   cohortsInOrder.sort(compareCohorts);
-
 
   // Figure out the width of each cohort grouping by counting all the cohorts
   // that have the same cohort grouping key.
