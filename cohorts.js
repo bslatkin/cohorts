@@ -352,30 +352,34 @@ function filterData(rows, groupType, groupValues, weekly) {
   // Now regroup the data as sets of points grouped by column (for D3).
   var columns = {};
   var headers = rows[0].slice(3);
+
+  function insertPoint(key, columnValues, columnIndex, header) {
+    var data = columns[header];
+    if (!data) {
+      data = []
+      columns[header] = data;
+    }
+    var stateCount = columnValues[columnIndex];
+    var point = {
+      cohort: key,
+      x: cohortsInOrder.indexOf(key),
+      y: stateCount,
+      barWidth: cohortWidth[key] || 0,
+      stateCount: stateCount,  // d3 will modify 'y' but not this
+      stateName: header
+    };
+    data.push(point);
+  }
+
   $.each(cohortsInOrder, function(index, key) {
     // If we're in weekly mode, this will set the dimensions of all of the
     // cohorts in a single weekly bucket to the same height.
     var cohortGrouping = getCohort(key, cohortsInOrder, weekly);
     var columnValues = cohorts[cohortGrouping];
 
-    // TODO: This is slow
-    $.each(headers, function(columnIndex, header) {
-      var data = columns[header];
-      if (!data) {
-        data = []
-        columns[header] = data;
-      }
-      var stateCount = columnValues[columnIndex];
-      var point = {
-        cohort: key,
-        x: cohortsInOrder.indexOf(key),
-        y: stateCount,
-        barWidth: cohortWidth[key] || 0,
-        stateCount: stateCount,  // d3 will modify 'y' but not this
-        stateName: header
-      };
-      data.push(point);
-    });
+    for (var i = 0, n = headers.length; i < n; ++i) {
+      insertPoint(key, columnValues, i, headers[i]);
+    }
   });
 
   var columnData = [];
