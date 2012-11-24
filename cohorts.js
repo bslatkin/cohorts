@@ -261,6 +261,13 @@ function getCohort(cohortDay, cohortsInOrder, weekly) {
 
 
 function filterData(rows, groupType, groupValues, weekly) {
+  // Construct a set of group values for faster set membership tests.
+  var groupValuesSet = {};
+  var hasGroupValues = groupValues.length > 0;
+  for (var i = 0, n = groupValues.length; i < n; i++) {
+    groupValuesSet[groupValues[i]] = true;
+  }
+
   // Helper function for only pulling the row data that matches.
   function shouldSkip(index, value) {
     // Skip the header row.
@@ -273,8 +280,7 @@ function filterData(rows, groupType, groupValues, weekly) {
     }
     // Skip rows with unmatched group values. Match everything if no values
     // were supplied.
-    if (groupValues.length > 0 &&
-        groupValues.indexOf(value[GROUP_VALUE_COLUMN]) == -1) {
+    if (hasGroupValues && !(value[GROUP_VALUE_COLUMN] in groupValuesSet)) {
       return true;
     }
     return false;
@@ -292,7 +298,7 @@ function filterData(rows, groupType, groupValues, weekly) {
     }
     var cohortDay = value[DAY_COLUMN];
     if (!(cohortDay in cohortsSet)) {
-      cohortsSet[cohortDay] = 1;
+      cohortsSet[cohortDay] = true;
     }
   });
   var cohortsInOrder = []
@@ -489,7 +495,7 @@ function updateViz(rows, cause) {
   var getStateName = function(d) {
     return d.stateName;
   };
-  var updateUi = function(e) {
+  var updateFinished = function(e) {
     updateInfoPanel(null, null);
   }
 
@@ -507,7 +513,7 @@ function updateViz(rows, cause) {
   stack = stack.values(getValues)(viewBarGroups);
 
   // Update the UI after the 'data-state-count' transitions are done.
-  chart.transition().each('end', updateUi);
+  chart.transition().each('end', updateFinished);
 
   var layers = chart.selectAll('g.layer').data(stack);
 
@@ -639,7 +645,13 @@ function handleClickVisualize() {
   // Register event handlers
   $(document).unbind('cohorts.viz');
   $(document).bind('cohorts.viz', function(e, cause) {
-    updateViz(rowsWithHeader, cause);
+    $('#loading-message').addClass('active');
+    // Do this in timeout0 so the UI doesn't feel janky when you select
+    // checkboxes and it takes a while to register.
+    setTimeout(function() {
+      updateViz(rowsWithHeader, cause);
+      $('#loading-message').removeClass('active');
+    }, 0);
   });
 
   // Clear any existing chart

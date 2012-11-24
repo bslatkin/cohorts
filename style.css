@@ -59,10 +59,18 @@ p, textarea, div {
   text-align: left;
   padding: 0 10px;
 }
+
 .controls-section > td {
   vertical-align: top;
   width: 33%;
 }
+#loading-message {
+  visibility: hidden;
+}
+#loading-message.active {
+  visibility: visible;
+}
+
 #viz_graph1 {
   text-align: center;
 }
