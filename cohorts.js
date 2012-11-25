@@ -128,37 +128,35 @@ function createLegend(rowsWithHeader) {
   var container = $('#viz_legend');
   container.empty();
 
-  var legendTable = $('<table class="legend-table inactive">');
+  var legendTable = $('<div class="legend-table inactive">');
 
   var color = d3.scale.category20();
   $.each(columnNames, function(index, value) {
-    var row = $('<tr class="legend-row">')
+    var row = $('<div class="legend-row">')
         .attr('data-state-name', value);
-    var legendBox = $('<td>');
     $('<div class="legend-box">')
         .attr('style', 'background-color: ' + color(index))
-        .appendTo(legendBox);
-    legendBox.appendTo(row);
-    $('<td class="legend-label">')
+        .appendTo(row);
+    $('<div class="legend-label">')
         .text(value)
         .appendTo(row);
-    $('<td class="legend-value">')
+    $('<div class="legend-value">')
         .appendTo(row);
-    $('<td class="legend-percentage">')
+    $('<div class="legend-percentage">')
         .appendTo(row);
     // Reverse order to match graph stacking.
     legendTable.prepend(row);
   });
 
   // Add a row for the totals
-  var row = $('<tr class="legend-total">');
-  $('<td>').html('&nbsp;').appendTo(row);
-  $('<td class="legend-label">')
+  var row = $('<div class="legend-total">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
       .text('Total')
       .appendTo(row);
-  $('<td class="legend-value">')
+  $('<div class="legend-value">')
       .appendTo(row);
-  $('<td class="legend-percentage">')
+  $('<div class="legend-percentage">')
       .appendTo(row);
   legendTable.append(row);
 

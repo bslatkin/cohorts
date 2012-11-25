@@ -34,29 +34,25 @@
 
 <a href="https://github.com/bslatkin/cohorts"><img style="position: absolute; top: 0; right: 0; border: 0; width: 120px; height: 120px;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 
-<table id="viz_container">
-  <thead>
-  <tr>
-    <th id="viz_title1" colspan="3">
-      <input class="viz-title fancy-bg" type="text" size="50" placeholder="Enter a graph title here">
-    </th>
-  </tr>
-  </thead>
+<div id="viz_container">
 
-  <tr>
-    <td id="viz_graph1" class="chart-cell" colspan="3">
-      <svg class="stacked">
-        <g></g>
-      </svg>
-    </td>
-  </tr>
+  <div id="viz_title1">
+    <input class="viz-title fancy-bg" type="text" size="50" placeholder="Enter a graph title here">
+  </div>
 
-  <tr class="controls-section">
-    <td>
-      <div id="loading-message">
-        Crunching...
-      </div>
+  <div id="viz_graph1" class="chart-cell">
+    <svg class="stacked">
+      <g></g>
+    </svg>
+  </div>
 
+  <div id="loading-message">
+    Crunching...
+  </div>
+
+  <div id="below-area">
+
+    <div id="controls-section">
       <div class="controls-header">
         Controls
       </div>
@@ -74,19 +70,22 @@
       </div>
       <div id="viz_group_type1"></div>
       <div id="viz_group_value1"></div>
-    </td>
-    <td>
-      <!-- Flex box here -->
-    </td>
-    <td>
-      <div class="controls-header">
-        Legend
-        <div class="legend-target"></div>
+    </div>
+
+    <div id="legend-section">
+      <div class="legend-header controls-header">
+        Legend <span class="legend-target"></span>
       </div>
       <div id="viz_legend"></div>
-    </td>
-  </tr>
-</table>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="clear"></div>
+
+<div id="explanation">
 
 <h2>Paste your CSV here</h2>
 <div>
@@ -570,6 +569,8 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
     <br>
     Built using <a href="http://www.jquery.org">jQuery</a>, <a href="http://d3js.org/">D3</a>, <a href="http://code.google.com/p/jquery-csv/">jQuery CSV</a>, <a href="http://www.google.com/webfonts">Web Fonts</a>, and <a href="http://subtlepatterns.com/">Subtle Patterns</a>
   </p>
+</div>
+
 </div>
 
 </body>

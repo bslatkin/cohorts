@@ -50,8 +50,16 @@ a:link, a:visited, a:active, a:hover {
   padding-left: 20px;
 }
 
-p, textarea, div {
+.clear {
+  clear: both;
+}
+
+#explanation,
+#explanation textarea {
   max-width: 700px;
+}
+#explanation {
+  margin-top: 30px;
 }
 
 #viz_container {
@@ -60,12 +68,27 @@ p, textarea, div {
   padding: 0 10px;
 }
 
-.controls-section > td {
-  vertical-align: top;
-  width: 33%;
+#below-area {
 }
+#controls-section {
+  float: left;
+  width: 250px;
+}
+#legend-section {
+  margin-left: 250px;
+}
+.legend-table {
+  -moz-column-width: 300px;
+  -webkit-column-width: 300px;
+}
+.legend-row {
+  -moz-column-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
 #loading-message {
   visibility: hidden;
+  width: 250px;
 }
 #loading-message.active {
   visibility: visible;
@@ -98,23 +121,12 @@ p, textarea, div {
   cursor: crosshair;
 }
 
-.chart-cell {
-}
-
 .controls-header {
-  margin: 10px 0;
+  margin: 20px 0 10px 0;
 }
 
-
-.legend-target {
-  display: inline;
-}
-.legend-table {
-  border: 0;
-  border-collapse: collapse;
-}
-.legend-table td {
-  vertical-align: middle;
+.legend-header {
+  display: inline-block;
 }
 .legend-box {
   display: inline-block;
@@ -125,7 +137,8 @@ p, textarea, div {
 }
 .legend-label {
   vertical-align: middle;
-  min-width: 150px;
+  width: 150px;
+  display: inline-block;
 }
 .legend-row.highlighted {
   background-color: #e0e0f0;
@@ -136,6 +149,7 @@ p, textarea, div {
   text-align: right;
   font-size: 12px;
   padding: 0 4px;
+  display: inline-block;
 }
 .legend-value {
 }
