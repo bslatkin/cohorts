@@ -53,30 +53,39 @@
   <div id="below-area">
 
     <div id="controls-section">
-      <div class="controls-header">
-        Controls
-      </div>
-      <div>
-        <input type="checkbox" name="normalize" id="normalize-check">
-        <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
-      </div>
-      <div>
-        <input type="checkbox" name="weekly" id="weekly-check">
-        <label for="weekly-check" title="Group cohorts by week">Weekly</label>
+      <div class="section">
+        <div class="section-header">
+          Controls
+        </div>
+        <div class="section-content">
+          <div>
+            <input type="checkbox" name="normalize" id="normalize-check">
+            <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
+          </div>
+          <div>
+            <input type="checkbox" name="weekly" id="weekly-check">
+            <label for="weekly-check" title="Group cohorts by week">Weekly</label>
+          </div>
+        </div>
       </div>
 
-      <div class="controls-header">
-        Filter by group type
+      <div class="section">
+        <div class="section-header">
+          Filter by group type
+        </div>
+        <div class="section-content">
+          <div id="viz_group_type1"></div>
+        </div>
       </div>
-      <div id="viz_group_type1"></div>
-      <div id="viz_group_value1"></div>
+
+      <div id="viz_group_value1" class="section"></div>
     </div>
 
-    <div id="legend-section">
-      <div class="legend-header controls-header">
+    <div id="legend-section" class="section">
+      <div class="section-header">
         Legend <span class="legend-target"></span>
       </div>
-      <div id="viz_legend"></div>
+      <div id="viz_legend" class="section-content"></div>
     </div>
 
   </div>

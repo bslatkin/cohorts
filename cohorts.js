@@ -100,8 +100,10 @@ function createGroupValueCheckboxes(groupTypes) {
   }
 
   valuesDiv.append(
-      $('<div class="controls-header">')
+      $('<div class="section-header">')
           .text('Included group values'));
+
+  var sectionContent = $('<div class="section-content">');
 
   var i = 0;
   $.each(values, function(key, value) {
@@ -113,8 +115,9 @@ function createGroupValueCheckboxes(groupTypes) {
         .attr('id', checkboxId));
     container.append(
         $('<label>').attr('for', checkboxId).text(value));
-    valuesDiv.append(container);
+    sectionContent.append(container);
   });
+  valuesDiv.append(sectionContent);
 
   // Register event handlers
   $('.group-value-checkbox').click(function() {

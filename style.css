@@ -69,17 +69,14 @@ a:link, a:visited, a:active, a:hover {
 }
 
 #below-area {
-}
-#controls-section {
-  float: left;
-  width: 250px;
-}
-#legend-section {
-  margin-left: 250px;
-}
-.legend-table {
   -moz-column-width: 300px;
   -webkit-column-width: 300px;
+}
+#controls-section {
+}
+#legend-section {
+  -moz-column-break-before: always;
+  -webkit-column-break-before: always;
 }
 .legend-row {
   -moz-column-break-inside: avoid;
@@ -88,7 +85,6 @@ a:link, a:visited, a:active, a:hover {
 
 #loading-message {
   visibility: hidden;
-  width: 250px;
 }
 #loading-message.active {
   visibility: visible;
@@ -120,14 +116,16 @@ a:link, a:visited, a:active, a:hover {
   shape-rendering: crispEdges;
   cursor: crosshair;
 }
-
-.controls-header {
-  margin: 20px 0 10px 0;
+.section {
+  -moz-column-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+.section-content {
+  margin: 10px 0;
+  -moz-column-break-inside: always;
+  -webkit-column-break-inside: always;
 }
 
-.legend-header {
-  display: inline-block;
-}
 .legend-box {
   display: inline-block;
   height: 16px;
