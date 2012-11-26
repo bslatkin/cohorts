@@ -94,6 +94,13 @@ function createGroupValueCheckboxes(groupTypes) {
   var valuesDiv = $('#viz_group_value1');
   valuesDiv.empty();
 
+  // Forces the multi-column view to look good for a small number of values.
+  if (values.length < 10) {
+    valuesDiv.addClass('section-small');
+  } else {
+    valuesDiv.removeClass('section-small');
+  }
+
   // Special case for group types that only have a single, empty value.
   if (values.length == 1 && values[0] === '') {
     return;

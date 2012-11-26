@@ -116,14 +116,12 @@ a:link, a:visited, a:active, a:hover {
   shape-rendering: crispEdges;
   cursor: crosshair;
 }
-.section {
+.section-small {
   -moz-column-break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
 .section-content {
   margin: 10px 0;
-  -moz-column-break-inside: always;
-  -webkit-column-break-inside: always;
 }
 
 .legend-box {
