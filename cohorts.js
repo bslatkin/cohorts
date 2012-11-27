@@ -94,9 +94,19 @@ function createGroupValueCheckboxes(groupTypes) {
   var valuesDiv = $('#viz_group_value1');
   valuesDiv.empty();
 
+  // Reset small section used for multi-column styling below. Do this up here
+  // in case there is only one empty value for this group type, which means
+  // the value div will be empty anyways.
+  valuesDiv.removeClass('section-small');
+
   // Special case for group types that only have a single, empty value.
   if (values.length == 1 && values[0] === '') {
     return;
+  }
+
+  // Forces multi-column view to look good for a small number of group values.
+  if (values.length > 1 && values.length < 10) {
+    valuesDiv.addClass('section-small');
   }
 
   valuesDiv.append(
@@ -165,11 +175,11 @@ function createLegend(rowsWithHeader) {
 
   container.append(legendTable);
 
-
-  // Forces the multi-column view to look good for a small number of states.
-  $('.section').removeClass('section-small');
+  // Forces multi-column view to look good for a small number of states.
+  var legendSection = $('#legend-section');
+  legendSection.removeClass('section-small');
   if (columnNames.length < 10) {
-    $('.section').addClass('section-small');
+    legendSection.addClass('section-small');
   }
 }
 
