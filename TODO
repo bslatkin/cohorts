@@ -1,8 +1,10 @@
-P3
-- Checkbox to hide some cohorts (or a way to base each state at zero so you can see how each state is growing/changing over time)
+Features
+- Checkbox to hide some cohorts (or a way to base each state at zero so you can see how each state is growing/changing over time); maybe do this with clicking on the legend?
 - Filter for group values by regex
+- Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
-
+- Checkbox to show cumulative percentages in table (from top 0% to bottom 100% in the same order as the states right to left)
+- Uncheck all group value boxes link
 
 Bugs
-- If a column has no value, we see NaNs; need better CSV validation
+- When some of the cohort days are missing, the graphs and animations act funny, showing the wrong legends
