@@ -49,11 +49,20 @@ function createGroupTypeRadios(groupTypes) {
   // Guess that whichever group type has only one value and that value is
   // empty will be the topline data.
   var checkedType = null;
+  var firstType = null;
   $.each(groupTypes, function(key, value) {
+    if (!firstType) {
+      firstType = key;
+    }
     if (value.length == 1 && value[0] === '') {
       checkedType = key;
     }
   });
+
+  // If there is no default type with the top-line then use the first one.
+  if (!checkedType) {
+    checkedType = firstType;
+  }
 
   var i = 0;
   $.each(groupTypes, function(key, value) {
