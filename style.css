@@ -135,6 +135,7 @@ a:link, a:visited, a:active, a:hover {
   vertical-align: middle;
   width: 150px;
   display: inline-block;
+  word-wrap: break-word;
 }
 .legend-row.highlighted {
   background-color: #e0e0f0;
