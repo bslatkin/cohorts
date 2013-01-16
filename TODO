@@ -4,7 +4,6 @@ Features
 - Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
 - Checkbox to show cumulative percentages in table (from top 0% to bottom 100% in the same order as the states right to left)
-- Uncheck all group value boxes link
 
 Bugs
-- When some of the cohort days are missing, the graphs and animations act funny, showing the wrong legends
+- X axis is truncated at the last label; it should keep going to the end

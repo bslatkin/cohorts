@@ -4,9 +4,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,11 @@ var DAY_COLUMN = 2;
 
 function getSelectedGroupType() {
   return $('input:radio[name=\'chart1\']:checked').val();
+}
+
+
+function getTotalGroupValues() {
+  return $('.group-value-checkbox').length;
 }
 
 
@@ -118,12 +123,32 @@ function createGroupValueCheckboxes(groupTypes) {
     valuesDiv.addClass('section-small');
   }
 
-  valuesDiv.append(
-      $('<div class="section-header">')
-          .text('Included group values'));
+  var valuesHeader = $('<div class="section-header">')
+      .text('Included group values');
 
+  // Toggles for checking all boxes.
+  var selectionToggle = $('<span class="selection-toggle">')
+    .append(' &ndash; ');
+  $('<a href="javascript:void(0)">')
+      .text('all')
+      .click(function() {
+        $('.group-value-checkbox').prop('checked', true);
+        $(document).trigger('cohorts.viz');
+      })
+      .appendTo(selectionToggle);
+  selectionToggle.append(' or ');
+  $('<a href="javascript:void(0)">')
+      .text('none')
+      .click(function() {
+        $('.group-value-checkbox').prop('checked', false);
+        $(document).trigger('cohorts.viz');
+      })
+      .appendTo(selectionToggle);
+  selectionToggle.appendTo(valuesHeader);
+  valuesHeader.appendTo(valuesDiv);
+
+  // Checkboxes for each group value
   var sectionContent = $('<div class="section-content">');
-
   var i = 0;
   $.each(values, function(key, value) {
     var checkboxId = 'group_value_checkbox1_' + (i++);
@@ -139,7 +164,7 @@ function createGroupValueCheckboxes(groupTypes) {
   valuesDiv.append(sectionContent);
 
   // Register event handlers
-  $('.group-value-checkbox').click(function() {
+  $('.group-value-checkbox').click(function(e) {
     $(document).trigger('cohorts.viz');
   });
 }
@@ -287,10 +312,9 @@ function getCohort(cohortDay, cohortsInOrder, weekly) {
 };
 
 
-function filterData(rows, groupType, groupValues, weekly) {
+function filterData(rows, groupType, groupValues, totalGroupValues, weekly) {
   // Construct a set of group values for faster set membership tests.
   var groupValuesSet = {};
-  var hasGroupValues = groupValues.length > 0;
   for (var i = 0, n = groupValues.length; i < n; i++) {
     groupValuesSet[groupValues[i]] = true;
   }
@@ -305,9 +329,10 @@ function filterData(rows, groupType, groupValues, weekly) {
     if (groupType !== value[GROUP_TYPE_COLUMN]) {
       return true;
     }
-    // Skip rows with unmatched group values. Match everything if no values
-    // were supplied.
-    if (hasGroupValues && !(value[GROUP_VALUE_COLUMN] in groupValuesSet)) {
+    // Skip rows with unmatched group values. If this group type has no group
+    // values then show everything.
+    if (totalGroupValues > 0 &&
+        !(value[GROUP_VALUE_COLUMN] in groupValuesSet)) {
       return true;
     }
     return false;
@@ -320,9 +345,9 @@ function filterData(rows, groupType, groupValues, weekly) {
   }
   var cohortsSet = {};
   $.each(rows, function(index, value) {
-    if (shouldSkip(index, value)) {
-      return;
-    }
+    // if (shouldSkip(index, value)) {
+    //   return;
+    // }
     var cohortDay = value[DAY_COLUMN];
     if (!(cohortDay in cohortsSet)) {
       cohortsSet[cohortDay] = true;
@@ -392,7 +417,10 @@ function filterData(rows, groupType, groupValues, weekly) {
       data = []
       columns[header] = data;
     }
-    var stateCount = columnValues[columnIndex];
+    var stateCount = 0;
+    if (!!columnValues) {
+      stateCount = columnValues[columnIndex];
+    }
     var point = {
       cohort: key,
       x: cohortsInOrder.indexOf(key),
@@ -456,10 +484,11 @@ function clearViz() {
 function updateViz(rows, cause) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
+  var totalGroupValues = getTotalGroupValues();
   var normalized = getIsNormalized();
   var weekly = getIsWeekly();
 
-  view = filterData(rows, groupType, groupValues, weekly);
+  var view = filterData(rows, groupType, groupValues, totalGroupValues, weekly);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
@@ -505,6 +534,10 @@ function updateViz(rows, cause) {
     return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
+    // Do not normalize zeros to take up 100% height; leave them at zero.
+    if (normalized && d.stateCount == 0) {
+      return 0;
+    }
     return scaleY(d.y);
   };
   var getWidth = function(d) {
