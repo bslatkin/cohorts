@@ -37,6 +37,14 @@ function getSelectedGroupValues() {
 }
 
 
+function getEnabledStateNames() {
+  return $.makeArray($('.legend-row:not(.disabled)').map(
+    function(i, n) {
+      return $(n).data('stateName');
+  }));
+}
+
+
 function getIsNormalized() {
   return $('input:checkbox[name=\'normalize\']:checked').val();
 }
@@ -180,7 +188,11 @@ function createLegend(rowsWithHeader) {
   var color = d3.scale.category20();
   $.each(columnNames, function(index, value) {
     var row = $('<div class="legend-row">')
-        .attr('data-state-name', value);
+        .attr('data-state-name', value)
+        .click(function(e) {
+          row.toggleClass('disabled');
+          $(document).trigger('cohorts.viz');
+        });
     $('<div class="legend-box">')
         .attr('style', 'background-color: ' + color(index))
         .appendTo(row);
@@ -312,7 +324,8 @@ function getCohort(cohortDay, cohortsInOrder, weekly) {
 };
 
 
-function filterData(rows, groupType, groupValues, totalGroupValues, weekly) {
+function filterData(rows, groupType, groupValues, totalGroupValues,
+                    includeStateNames, weekly, normalized) {
   // Construct a set of group values for faster set membership tests.
   var groupValuesSet = {};
   for (var i = 0, n = groupValues.length; i < n; i++) {
@@ -345,9 +358,6 @@ function filterData(rows, groupType, groupValues, totalGroupValues, weekly) {
   }
   var cohortsSet = {};
   $.each(rows, function(index, value) {
-    // if (shouldSkip(index, value)) {
-    //   return;
-    // }
     var cohortDay = value[DAY_COLUMN];
     if (!(cohortDay in cohortsSet)) {
       cohortsSet[cohortDay] = true;
@@ -421,10 +431,16 @@ function filterData(rows, groupType, groupValues, totalGroupValues, weekly) {
     if (!!columnValues) {
       stateCount = columnValues[columnIndex];
     }
+    // If this value is disabled then pretend like it's set to zero.
+    var height = stateCount;
+    if (includeStateNames.indexOf(header) == -1) {
+      height = 0;
+      stateCount = 0;
+    }
     var point = {
       cohort: key,
       x: cohortsInOrder.indexOf(key),
-      y: stateCount,
+      y: height,
       barWidth: cohortWidth[key] || 0,
       stateCount: stateCount,  // d3 will modify 'y' but not this
       stateName: header
@@ -485,10 +501,13 @@ function updateViz(rows, cause) {
   var groupType = getSelectedGroupType();
   var groupValues = getSelectedGroupValues();
   var totalGroupValues = getTotalGroupValues();
+  var includeStateNames = getEnabledStateNames();
   var normalized = getIsNormalized();
   var weekly = getIsWeekly();
 
-  var view = filterData(rows, groupType, groupValues, totalGroupValues, weekly);
+  var view = filterData(
+      rows, groupType, groupValues, totalGroupValues,
+      includeStateNames, weekly);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
@@ -534,7 +553,7 @@ function updateViz(rows, cause) {
     return scaleY(maxY - d.y0 - d.y);
   };
   var getHeight = function(d) {
-    // Do not normalize zeros to take up 100% height; leave them at zero.
+    // Do not stretch zeros to take up 100% height; leave them at zero.
     if (normalized && d.stateCount == 0) {
       return 0;
     }

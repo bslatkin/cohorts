@@ -133,6 +133,9 @@ a:link, a:visited, a:active, a:hover {
   width: 16px;
   vertical-align: middle;
   margin: 4px 8px;
+  border-width: 1px;
+  border-color: #000;
+  border-style: solid;
 }
 .legend-label {
   vertical-align: middle;
@@ -140,8 +143,14 @@ a:link, a:visited, a:active, a:hover {
   display: inline-block;
   word-wrap: break-word;
 }
+.legend-row {
+  cursor: default;
+}
 .legend-row.highlighted {
   background-color: #e0e0f0;
+}
+.legend-row:hover {
+  background-color: #e0e0e0;
 }
 .legend-value,
 .legend-percentage {
@@ -158,6 +167,12 @@ a:link, a:visited, a:active, a:hover {
 }
 .legend-total {
   font-weight: bold;
+}
+.disabled .legend-box,
+.disabled .legend-label,
+.disabled .legend-value,
+.disabled .legend-percentage {
+  opacity: 0.5;
 }
 
 .example-table td, .example-table th {

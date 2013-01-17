@@ -1,9 +1,24 @@
 Features
-- Checkbox to hide some cohorts (or a way to base each state at zero so you can see how each state is growing/changing over time); maybe do this with clicking on the legend?
 - Filter for group values by regex
 - Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
 - Checkbox to show cumulative percentages in table (from top 0% to bottom 100% in the same order as the states right to left)
+- Group users by month in addition to by week
 
 Bugs
 - X axis is truncated at the last label; it should keep going to the end
+
+
+
+Thoughts on other visualizations:
+
+* User Retention
+
+* Activity by user age
+Here the cohorts would be the birthdays of the user *actions* not the users themselves. State columns are the ages of the users in months, descending (Month 9, Month 8, Month 7, ...). For each cohort day, count the number of acitivites a user has done towards the activity you care about. The cohort group types would be the types of activities. Cohort group values would be specific activities to measure. Importantly, users of age "Month 0" would not show up in cohorts from 30 days ago, since that's not possible.
+
+Concrete example for a social network.
+- Cohort group type "followers". Group values: "Followed someone else", "Got followed". Each cohort day would show amount of activity on that day, split by how old the user way. Normalized view would tell you percentage of activites from younger users versus older users.
+
+
+* Churn: TBD
