@@ -219,6 +219,30 @@ function createLegend(rowsWithHeader) {
       .appendTo(row);
   legendTable.append(row);
 
+  // Add row for cumulative percentage upwards
+  var row = $('<div class="legend-cumulative-up">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&uarr;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  legendTable.append(row);
+
+  // Add row for cumulative percentage downwards
+  var row = $('<div class="legend-cumulative-down">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&darr;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  legendTable.append(row);
+
   container.append(legendTable);
 
   // Forces multi-column view to look good for a small number of states.
@@ -283,12 +307,26 @@ function updateInfoPanel(cohort, highlightStateName) {
   $('.legend-target').text(' - ' + cohort);
   $('.legend-table').removeClass('inactive');
 
-  // Figure out the denominator for percentages
+  // Count up totals. This iterates starting at the bottom item in the
+  // legend up to the top of the chart, vertically.
   var total = 0;
+  var sumUp = 0;
+  var before = true;
+  var sumDown = 0;
   $.each(cohortBars, function(index, value) {
     var el = $(value);
     var stateCount = parseInt(el.attr('data-state-count'));
     total += stateCount;
+
+    // Cumulative percentages do not include the point itself.
+    var stateName = el.attr('data-state-name');
+    if (stateName == highlightStateName) {
+      before = false;
+    } else if (before) {
+      sumDown += stateCount;
+    } else {
+      sumUp += stateCount;
+    }
   });
   legend.find('.legend-total>.legend-value').text(total);
 
@@ -309,6 +347,14 @@ function updateInfoPanel(cohort, highlightStateName) {
       legendRow.addClass('highlighted');
     }
   });
+
+  // Update cumulative percentages
+  legend.find('.legend-cumulative-up>.legend-value').text(sumUp);
+  legend.find('.legend-cumulative-down>.legend-value').text(sumDown);
+  legend.find('.legend-cumulative-up>.legend-percentage')
+    .text(format(total ? sumUp / total : 0));
+  legend.find('.legend-cumulative-down>.legend-percentage')
+    .text(format(total ? sumDown / total : 0));
 }
 
 

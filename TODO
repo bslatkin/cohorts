@@ -2,7 +2,6 @@ Features
 - Filter for group values by regex
 - Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
-- Checkbox to show cumulative percentages in table (from top 0% to bottom 100% in the same order as the states right to left)
 - Group users by month in addition to by week
 
 Bugs
