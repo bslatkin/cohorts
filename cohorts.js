@@ -254,6 +254,7 @@ function createLegend(rowsWithHeader) {
 }
 
 
+// Resets the info panel back to the default state.
 function clearInfoPanel() {
   $('.legend-row').removeClass('highlighted');
   $('.legend-value').text('');
@@ -267,6 +268,20 @@ function clearInfoPanel() {
 }
 
 
+// Resets the info panel back to a state where the mouse isn't hovering
+// over part of the graph. The column selected should be sticky, but
+// everything else should be reset.
+function clearInfoPanelMouseDetail() {
+  $('.legend-row').removeClass('highlighted');
+
+  var legend = $('#viz_legend');
+  legend.find('.legend-cumulative-up>.legend-value').text('');
+  legend.find('.legend-cumulative-down>.legend-value').text('');
+  legend.find('.legend-cumulative-up>.legend-percentage').text('');
+  legend.find('.legend-cumulative-down>.legend-percentage').text('');
+}
+
+
 function handleInfoPanel(e) {
   if (e.type == 'mouseenter') {
     var el = $(e.currentTarget);
@@ -274,8 +289,8 @@ function handleInfoPanel(e) {
     var stateName = el.attr('data-state-name');
     updateInfoPanel(cohort, stateName);
   } else {
-    // On mouse out, clear the highlighted row in the legend.
-    $('.legend-row').removeClass('highlighted');
+    // Mouse out
+    clearInfoPanelMouseDetail();
   }
 }
 

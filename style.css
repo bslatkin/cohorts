@@ -167,9 +167,6 @@ a:link, a:visited, a:active, a:hover {
 .inactive .legend-cumulative-down {
   visibility: hidden;
 }
-.legend-total {
-  font-weight: bold;
-}
 .legend-total .legend-box,
 .legend-cumulative-up .legend-box,
 .legend-cumulative-down .legend-box {
