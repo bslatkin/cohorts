@@ -439,6 +439,15 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
     cohortWidth[cohortGrouping] = count + 1;
   });
 
+  // Figure out which cohort state columns to skip.
+  var headers = rows[0].slice(3);
+  var skipColumn = {};
+  for (var i = 0; i < headers.length; i++) {
+    if (includeStateNames.indexOf(headers[i]) == -1) {
+      skipColumn[i] = true;
+    }
+  }
+
   // Maps cohort key to the combined data row for the key. The data rows in
   // the values of this map have all cohort columns removed.
   var cohorts = {};
@@ -450,19 +459,18 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
     }
 
     var cohort = getCohort(value[DAY_COLUMN], cohortsInOrder, weekly);
-    var cohortRows = cohorts[cohort];
-    if (!cohortRows) {
+    var cohortRow = cohorts[cohort];
+    if (!cohortRow) {
       // First row for a cohort. Truncate the group type, group name, and date
       // columns, leaving just numeric data.
-      var firstRow = [];
+      var cohortRow = [];
       for (var i = 3, n = value.length; i < n; ++i) {
-        firstRow.push(parseInt(value[i]));
+        cohortRow.push(0);
       }
-      cohorts[cohort] = firstRow;
-    } else {
-      for (var i = 0, n = cohortRows.length; i < n; ++i) {
-        cohortRows[i] += parseInt(value[i + 3]);
-      }
+      cohorts[cohort] = cohortRow;
+    }
+    for (var i = 0, n = cohortRow.length; i < n; ++i) {
+      cohortRow[i] += !skipColumn[i] ? parseInt(value[i + 3]) : 0;
     }
   });
 
@@ -480,8 +488,6 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
 
   // Now regroup the data as sets of points grouped by column (for D3).
   var columns = {};
-  var headers = rows[0].slice(3);
-
   function insertPoint(key, columnValues, columnIndex, header) {
     var data = columns[header];
     if (!data) {
@@ -492,16 +498,10 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
     if (!!columnValues) {
       stateCount = columnValues[columnIndex];
     }
-    // If this value is disabled then pretend like it's set to zero.
-    var height = stateCount;
-    if (includeStateNames.indexOf(header) == -1) {
-      height = 0;
-      stateCount = 0;
-    }
     var point = {
       cohort: key,
       x: cohortsInOrder.indexOf(key),
-      y: height,
+      y: stateCount,
       barWidth: cohortWidth[key] || 0,
       stateCount: stateCount,  // d3 will modify 'y' but not this
       stateName: header
