@@ -425,6 +425,10 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   }
   var cohortsSet = {};
   $.each(rows, function(index, value) {
+    if (index == 0) {
+      // Skip header row
+      return;
+    }
     var cohortDay = value[DAY_COLUMN];
     if (!(cohortDay in cohortsSet)) {
       cohortsSet[cohortDay] = true;
