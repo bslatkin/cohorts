@@ -50,8 +50,8 @@ function getIsNormalized() {
 }
 
 
-function getIsWeekly() {
-  return $('input:checkbox[name=\'weekly\']:checked').val();
+function getPeriod() {
+  return $('input:radio[name=\'period\']:checked').val();
 }
 
 
@@ -373,20 +373,26 @@ function updateInfoPanel(cohort, highlightStateName) {
 }
 
 
-function getCohort(cohortDay, cohortsInOrder, weekly) {
-  if (weekly) {
+function getCohort(cohortDay, cohortsInOrder, period) {
+  if (period == 'monthly') {
+    var index = cohortsInOrder.indexOf(cohortDay);
+    var indexRounded = 30 * Math.floor(index / 30);
+    result = cohortsInOrder[indexRounded];
+    return result;
+  } else if (period == 'weekly') {
     var index = cohortsInOrder.indexOf(cohortDay);
     var indexRounded = 7 * Math.floor(index / 7);
     result = cohortsInOrder[indexRounded];
     return result;
   } else {
+    // Daily
     return cohortDay;
   }
 };
 
 
 function filterData(rows, groupType, groupValues, totalGroupValues,
-                    includeStateNames, weekly, normalized) {
+                    includeStateNames, period, normalized) {
   // Construct a set of group values for faster set membership tests.
   var groupValuesSet = {};
   for (var i = 0, n = groupValues.length; i < n; i++) {
@@ -434,7 +440,7 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   // that have the same cohort grouping key.
   var cohortWidth = {};
   $.each(cohortsInOrder, function(index, value) {
-    var cohortGrouping = getCohort(value, cohortsInOrder, weekly);
+    var cohortGrouping = getCohort(value, cohortsInOrder, period);
     var count = cohortWidth[cohortGrouping] || 0;
     cohortWidth[cohortGrouping] = count + 1;
   });
@@ -458,7 +464,7 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
       return;
     }
 
-    var cohort = getCohort(value[DAY_COLUMN], cohortsInOrder, weekly);
+    var cohort = getCohort(value[DAY_COLUMN], cohortsInOrder, period);
     var cohortRow = cohorts[cohort];
     if (!cohortRow) {
       // First row for a cohort. Truncate the group type, group name, and date
@@ -512,7 +518,7 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   $.each(cohortsInOrder, function(index, key) {
     // If we're in weekly mode, this will set the dimensions of all of the
     // cohorts in a single weekly bucket to the same height.
-    var cohortGrouping = getCohort(key, cohortsInOrder, weekly);
+    var cohortGrouping = getCohort(key, cohortsInOrder, period);
     var columnValues = cohorts[cohortGrouping];
 
     for (var i = 0, n = headers.length; i < n; ++i) {
@@ -564,11 +570,11 @@ function updateViz(rows, cause) {
   var totalGroupValues = getTotalGroupValues();
   var includeStateNames = getEnabledStateNames();
   var normalized = getIsNormalized();
-  var weekly = getIsWeekly();
+  var period = getPeriod();
 
   var view = filterData(
       rows, groupType, groupValues, totalGroupValues,
-      includeStateNames, weekly);
+      includeStateNames, period);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
@@ -675,10 +681,25 @@ function updateViz(rows, cause) {
       .attr('height', getHeight)
       .attr('stroke', d3.rgb('#333'));
 
-  if (cause == 'weekly') {
-    if (weekly) {
+  if (cause == 'period') {
+    if (period == 'monthly') {
       bars.transition()
           .duration(0)
+          .attr('width', barWidth)
+          .attr('data-state-count', getStateCount)
+        .transition()
+          .duration(500)
+          .attr('height', getHeight)
+          .attr('x', getX)
+          .attr('y', getY)
+        .transition()
+          .delay(750)
+          .duration(0)
+          .attr('width', getWidth)
+    } else if (period == 'weekly') {
+      bars.transition()
+          .duration(0)
+          .attr('width', barWidth)
           .attr('data-state-count', getStateCount)
         .transition()
           .duration(500)
@@ -812,8 +833,9 @@ function init() {
   };
 
   $('#normalize-check').click(trigger('normalize'));
-  $('#weekly-check').click(trigger('weekly'));
-  $('#weekly-check').click(clearInfoPanel);
+  $('input:radio[name=\'period\']')
+      .click(trigger('period'))
+      .click(clearInfoPanel);
 
   $(window).resize(trigger('resize'));
 

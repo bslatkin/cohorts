@@ -2,7 +2,6 @@ Features
 - Filter for group values by regex
 - Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
-- Group users by month in addition to by week
 
 Bugs
 - X axis is truncated at the last label; it should keep going to the end

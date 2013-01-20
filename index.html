@@ -63,8 +63,16 @@
             <label for="normalize-check" title="Scale each bar to 100%">Normalize</label>
           </div>
           <div>
-            <input type="checkbox" name="weekly" id="weekly-check">
+            <input type="radio" name="period" id="daily-check" value="daily" checked>
+            <label for="daily-check" title="Group cohorts by day">Daily</label>
+          </div>
+          <div>
+            <input type="radio" name="period" id="weekly-check" value="weekly">
             <label for="weekly-check" title="Group cohorts by week">Weekly</label>
+          </div>
+          <div>
+            <input type="radio" name="period" id="monthly-check" value="monthly">
+            <label for="monthly-check" title="Group cohorts by week">Monthly</label>
           </div>
         </div>
       </div>
