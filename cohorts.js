@@ -249,10 +249,21 @@ function createLegend(rowsWithHeader) {
       .appendTo(row);
   calcTable.append(row);
 
+  // Add row for cumulative percentage horizontally
+  var row = $('<div class="legend-cumulative-horizontal">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&#x2194;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
   calcContainer.append(calcTable);
   container.append(legendTable);
 }
-
 
 // Resets the info panel back to the default state.
 function clearInfoPanel() {
@@ -281,6 +292,8 @@ function clearInfoPanelMouseDetail() {
   calcLegend.find('.legend-cumulative-down>.legend-percentage').text('');
   calcLegend.find('.legend-cumulative-left>.legend-value').text('');
   calcLegend.find('.legend-cumulative-left>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-horizontal>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-horizontal>.legend-percentage').text('');
 }
 
 
@@ -351,8 +364,9 @@ function updateInfoPanel(cohort, highlightStateName) {
   });
   legend.find('.legend-total>.legend-value').text(total);
 
-  // Count up totals for the highlighted state name.
+  // Count up totals for the highlighted state name horizontally across cohorts.
   var sumLeft = 0;
+  var sumHorizontal = 0;
   if (!!highlightStateName) {
     var format = d3.time.format("%m/%d/%y");
     var highlightedCohortTime = format.parse(cohort);
@@ -364,12 +378,11 @@ function updateInfoPanel(cohort, highlightStateName) {
         return;
       }
       var cohort = format.parse(el.attr('data-cohort'));
-      if (cohort > highlightedCohortTime) {
-        // Ignore cohorts to the right of the current one.
-        return;
-      }
       var stateCount = parseInt(el.attr('data-state-count'));
-      sumLeft += stateCount;
+      sumHorizontal += stateCount;
+      if (cohort <= highlightedCohortTime) {
+        sumLeft += stateCount;
+      }
     });
   }
 
@@ -405,6 +418,11 @@ function updateInfoPanel(cohort, highlightStateName) {
     calcLegend.find('.legend-cumulative-left>.legend-value').text(sumLeft);
     calcLegend.find('.legend-cumulative-left>.legend-percentage')
       .text(format(sumLeft ? highlightedCount / sumLeft : 0));
+
+    calcLegend.find('.legend-cumulative-horizontal>.legend-value')
+      .text(sumHorizontal);
+    calcLegend.find('.legend-cumulative-horizontal>.legend-percentage')
+      .text(format(sumHorizontal ? highlightedCount / sumHorizontal : 0));
   } else {
     clearInfoPanelMouseDetail();
   }
@@ -852,7 +870,7 @@ function handleClickVisualize() {
     // Do this in timeout0 so the UI doesn't feel janky when you select
     // checkboxes and it takes a while to register.
     setTimeout(function() {
-      if (cause == 'group-type') {
+      if (cause == 'group-type' || cause == 'click-viz') {
         // Force the multi-column height to recalculate by removing the column
         // width property and re-adding it after reflow.
         $('#below-area').removeClass('below-area-column-wrap');
@@ -867,7 +885,7 @@ function handleClickVisualize() {
   clearViz();
 
   // Build chart
-  $(document).trigger('cohorts.viz');
+  $(document).trigger('cohorts.viz', 'click-viz');
 }
 
 
