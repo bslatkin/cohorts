@@ -101,7 +101,7 @@ function createGroupTypeRadios(groupTypes) {
   // Register event handlers
   $('.group-type-radio').click(function() {
     createGroupValueCheckboxes(groupTypes);
-    $(document).trigger('cohorts.viz');
+    $(document).trigger('cohorts.viz', 'group-type');
   });
 }
 
@@ -116,19 +116,9 @@ function createGroupValueCheckboxes(groupTypes) {
   var valuesDiv = $('#viz_group_value1');
   valuesDiv.empty();
 
-  // Reset small section used for multi-column styling below. Do this up here
-  // in case there is only one empty value for this group type, which means
-  // the value div will be empty anyways.
-  valuesDiv.removeClass('section-small');
-
   // Special case for group types that only have a single, empty value.
   if (values.length == 1 && values[0] === '') {
     return;
-  }
-
-  // Forces multi-column view to look good for a small number of group values.
-  if (values.length > 1 && values.length < 10) {
-    valuesDiv.addClass('section-small');
   }
 
   var valuesHeader = $('<div class="section-header">')
@@ -220,6 +210,10 @@ function createLegend(rowsWithHeader) {
   legendTable.append(row);
 
   // Add row for cumulative percentage upwards
+  var calcContainer = $('#calc_legend');
+  calcContainer.empty();
+  var calcTable = $('<div class="legend-table">');
+
   var row = $('<div class="legend-cumulative-up">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
@@ -229,7 +223,7 @@ function createLegend(rowsWithHeader) {
       .appendTo(row);
   $('<div class="legend-percentage">')
       .appendTo(row);
-  legendTable.append(row);
+  calcTable.append(row);
 
   // Add row for cumulative percentage downwards
   var row = $('<div class="legend-cumulative-down">');
@@ -241,16 +235,22 @@ function createLegend(rowsWithHeader) {
       .appendTo(row);
   $('<div class="legend-percentage">')
       .appendTo(row);
-  legendTable.append(row);
+  calcTable.append(row);
 
+  // Add row for cumulative percentage left
+  var row = $('<div class="legend-cumulative-left">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&larr;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
+  calcContainer.append(calcTable);
   container.append(legendTable);
-
-  // Forces multi-column view to look good for a small number of states.
-  var legendSection = $('#legend-section');
-  legendSection.removeClass('section-small');
-  if (columnNames.length < 10) {
-    legendSection.addClass('section-small');
-  }
 }
 
 
@@ -274,11 +274,13 @@ function clearInfoPanel() {
 function clearInfoPanelMouseDetail() {
   $('.legend-row').removeClass('highlighted');
 
-  var legend = $('#viz_legend');
-  legend.find('.legend-cumulative-up>.legend-value').text('');
-  legend.find('.legend-cumulative-down>.legend-value').text('');
-  legend.find('.legend-cumulative-up>.legend-percentage').text('');
-  legend.find('.legend-cumulative-down>.legend-percentage').text('');
+  var calcLegend = $('#calc_legend');
+  calcLegend.find('.legend-cumulative-up>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-up>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-down>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-down>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-left>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-left>.legend-percentage').text('');
 }
 
 
@@ -322,21 +324,25 @@ function updateInfoPanel(cohort, highlightStateName) {
   $('.legend-target').text(' - ' + cohort);
   $('.legend-table').removeClass('inactive');
 
-  // Count up totals. This iterates starting at the bottom item in the
-  // legend up to the top of the chart, vertically.
+  // Count up totals for the highlighted column. This iterates starting at the
+  // bottom item in the legend up to the top of the chart, vertically.
   var total = 0;
   var sumUp = 0;
   var before = true;
   var sumDown = 0;
+  var highlightedCount = 0;
   $.each(cohortBars, function(index, value) {
     var el = $(value);
     var stateCount = parseInt(el.attr('data-state-count'));
     total += stateCount;
 
-    // Cumulative percentages do not include the point itself.
+    // Cumulative percentages. Include the point itself.
     var stateName = el.attr('data-state-name');
     if (stateName == highlightStateName) {
       before = false;
+      highlightedCount = stateCount;
+      sumUp += stateCount;
+      sumDown += stateCount;
     } else if (before) {
       sumDown += stateCount;
     } else {
@@ -344,6 +350,28 @@ function updateInfoPanel(cohort, highlightStateName) {
     }
   });
   legend.find('.legend-total>.legend-value').text(total);
+
+  // Count up totals for the highlighted state name.
+  var sumLeft = 0;
+  if (!!highlightStateName) {
+    var format = d3.time.format("%m/%d/%y");
+    var highlightedCohortTime = format.parse(cohort);
+    var allStateBars = $('rect[data-state-name="' + highlightStateName + '"]');
+    $.each(allStateBars, function(index, value) {
+      var el = $(value);
+      if (el.attr('width') == 0) {
+        // Ignore bars hidden by weekly or monthly grouping.
+        return;
+      }
+      var cohort = format.parse(el.attr('data-cohort'));
+      if (cohort > highlightedCohortTime) {
+        // Ignore cohorts to the right of the current one.
+        return;
+      }
+      var stateCount = parseInt(el.attr('data-state-count'));
+      sumLeft += stateCount;
+    });
+  }
 
   // Update each legend item to match the highlighted bar
   var format = d3.format('%');
@@ -363,13 +391,23 @@ function updateInfoPanel(cohort, highlightStateName) {
     }
   });
 
-  // Update cumulative percentages
-  legend.find('.legend-cumulative-up>.legend-value').text(sumUp);
-  legend.find('.legend-cumulative-down>.legend-value').text(sumDown);
-  legend.find('.legend-cumulative-up>.legend-percentage')
-    .text(format(total ? sumUp / total : 0));
-  legend.find('.legend-cumulative-down>.legend-percentage')
-    .text(format(total ? sumDown / total : 0));
+  // Update cumulative percentages, or clear them if no state is highlighted.
+  if (!!highlightStateName) {
+    var calcLegend = $('#calc_legend');
+    calcLegend.find('.legend-cumulative-up>.legend-value').text(sumUp);
+    calcLegend.find('.legend-cumulative-up>.legend-percentage')
+      .text(format(total ? sumUp / total : 0));
+
+    calcLegend.find('.legend-cumulative-down>.legend-value').text(sumDown);
+    calcLegend.find('.legend-cumulative-down>.legend-percentage')
+      .text(format(total ? sumDown / total : 0));
+
+    calcLegend.find('.legend-cumulative-left>.legend-value').text(sumLeft);
+    calcLegend.find('.legend-cumulative-left>.legend-percentage')
+      .text(format(sumLeft ? highlightedCount / sumLeft : 0));
+  } else {
+    clearInfoPanelMouseDetail();
+  }
 }
 
 
@@ -814,8 +852,14 @@ function handleClickVisualize() {
     // Do this in timeout0 so the UI doesn't feel janky when you select
     // checkboxes and it takes a while to register.
     setTimeout(function() {
+      if (cause == 'group-type') {
+        // Force the multi-column height to recalculate by removing the column
+        // width property and re-adding it after reflow.
+        $('#below-area').removeClass('below-area-column-wrap');
+      }
       updateViz(rowsWithHeader, cause);
       $('#loading-message').removeClass('active');
+      $('#below-area').addClass('below-area-column-wrap');
     }, 0);
   });
 

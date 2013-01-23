@@ -69,6 +69,8 @@ a:link, a:visited, a:active, a:hover {
 }
 
 #below-area {
+}
+.below-area-column-wrap {
   -moz-column-width: 300px;
   -webkit-column-width: 300px;
 }
@@ -116,7 +118,8 @@ a:link, a:visited, a:active, a:hover {
   shape-rendering: crispEdges;
   cursor: crosshair;
 }
-.section-small {
+.section {
+  column-break-inside: avoid;
   -moz-column-break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
@@ -162,14 +165,13 @@ a:link, a:visited, a:active, a:hover {
 }
 .legend-value {
 }
-.inactive .legend-total,
-.inactive .legend-cumulative-up,
-.inactive .legend-cumulative-down {
+.inactive .legend-total {
   visibility: hidden;
 }
 .legend-total .legend-box,
 .legend-cumulative-up .legend-box,
-.legend-cumulative-down .legend-box {
+.legend-cumulative-down .legend-box,
+.legend-cumulative-left .legend-box {
   visibility: hidden;
 }
 .disabled .legend-box,
