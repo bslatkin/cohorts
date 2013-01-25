@@ -249,11 +249,47 @@ function createLegend(rowsWithHeader) {
       .appendTo(row);
   calcTable.append(row);
 
+  // Add row for cumulative percentage right
+  var row = $('<div class="legend-cumulative-right">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&rarr;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
   // Add row for cumulative percentage horizontally
   var row = $('<div class="legend-cumulative-horizontal">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
       .html('&#x2211;&#x2194;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
+  // Add row for cumulative percentage left over percental horizontal
+  var row = $('<div class="legend-cumulative-left-ratio">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&larr; / &#x2211;&#x2194;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
+  // Add row for cumulative percentage right over percental horizontal
+  var row = $('<div class="legend-cumulative-right-ratio">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('&#x2211;&rarr; / &#x2211;&#x2194;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -292,8 +328,14 @@ function clearInfoPanelMouseDetail() {
   calcLegend.find('.legend-cumulative-down>.legend-percentage').text('');
   calcLegend.find('.legend-cumulative-left>.legend-value').text('');
   calcLegend.find('.legend-cumulative-left>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-right>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-right>.legend-percentage').text('');
   calcLegend.find('.legend-cumulative-horizontal>.legend-value').text('');
   calcLegend.find('.legend-cumulative-horizontal>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-left-ratio>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-left-ratio>.legend-percentage').text('');
+  calcLegend.find('.legend-cumulative-right-ratio>.legend-value').text('');
+  calcLegend.find('.legend-cumulative-right-ratio>.legend-percentage').text('');
 }
 
 
@@ -419,10 +461,23 @@ function updateInfoPanel(cohort, highlightStateName) {
     calcLegend.find('.legend-cumulative-left>.legend-percentage')
       .text(format(sumLeft ? highlightedCount / sumLeft : 0));
 
+    var sumRight = sumHorizontal - sumLeft + highlightedCount;
+    calcLegend.find('.legend-cumulative-right>.legend-value').text(sumRight);
+    calcLegend.find('.legend-cumulative-right>.legend-percentage')
+      .text(format(sumRight ? highlightedCount / sumRight : 0));
+
     calcLegend.find('.legend-cumulative-horizontal>.legend-value')
       .text(sumHorizontal);
     calcLegend.find('.legend-cumulative-horizontal>.legend-percentage')
       .text(format(sumHorizontal ? highlightedCount / sumHorizontal : 0));
+
+    calcLegend.find('.legend-cumulative-right-ratio>.legend-value').text('');
+    calcLegend.find('.legend-cumulative-right-ratio>.legend-percentage')
+      .text(format(sumRight ? sumRight / sumHorizontal : 0));
+
+    calcLegend.find('.legend-cumulative-left-ratio>.legend-value').text('');
+    calcLegend.find('.legend-cumulative-left-ratio>.legend-percentage')
+      .text(format(sumLeft ? sumLeft / sumHorizontal : 0));
   } else {
     clearInfoPanelMouseDetail();
   }

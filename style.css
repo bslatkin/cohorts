@@ -172,7 +172,10 @@ a:link, a:visited, a:active, a:hover {
 .legend-cumulative-up .legend-box,
 .legend-cumulative-down .legend-box,
 .legend-cumulative-left .legend-box,
-.legend-cumulative-horizontal .legend-box {
+.legend-cumulative-right .legend-box,
+.legend-cumulative-horizontal .legend-box,
+.legend-cumulative-left-ratio .legend-box,
+.legend-cumulative-right-ratio .legend-box {
   visibility: hidden;
 }
 .disabled .legend-box,
