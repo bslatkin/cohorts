@@ -70,11 +70,15 @@ a:link, a:visited, a:active, a:hover {
 
 #below-area {
 }
+#control-section {
+  -moz-column-break-after: always;
+  -webkit-column-break-after: always;
+  -moz-column-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
 .below-area-column-wrap {
   -moz-column-width: 300px;
   -webkit-column-width: 300px;
-}
-#controls-section {
 }
 #legend-section {
   -moz-column-break-before: always;
@@ -126,7 +130,8 @@ a:link, a:visited, a:active, a:hover {
 .section-content {
   margin: 10px 0;
 }
-.selection-toggle {
+.selection-toggle,
+.section-header-small {
   font-size: 11px;
 }
 

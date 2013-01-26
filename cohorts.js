@@ -55,6 +55,15 @@ function getPeriod() {
 }
 
 
+function getPointType() {
+  return $('input:radio[name=\'point_type\']:checked').val();
+}
+
+function getIncludedSigns() {
+  return $('input:radio[name=\'sign\']:checked').val();
+}
+
+
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
@@ -376,7 +385,7 @@ function updateInfoPanel(cohort, highlightStateName) {
 
   // Reset the legend
   $('.legend-target').attr('data-target', cohort);
-  $('.legend-target').text(' - ' + cohort);
+  $('.legend-target').text(' \u2013 ' + cohort);
   $('.legend-table').removeClass('inactive');
 
   // Count up totals for the highlighted column. This iterates starting at the
@@ -503,7 +512,10 @@ function getCohort(cohortDay, cohortsInOrder, period) {
 
 
 function filterData(rows, groupType, groupValues, totalGroupValues,
-                    includeStateNames, period, normalized) {
+                    includeStateNames, period, pointType, includedSigns) {
+  var positives = includedSigns == 'positive' || includedSigns == 'both';
+  var negatives = includedSigns == 'negative' || includedSigns == 'both';
+
   // Construct a set of group values for faster set membership tests.
   var groupValuesSet = {};
   for (var i = 0, n = groupValues.length; i < n; i++) {
@@ -591,15 +603,88 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
       cohorts[cohort] = cohortRow;
     }
     for (var i = 0, n = cohortRow.length; i < n; ++i) {
-      cohortRow[i] += !skipColumn[i] ? parseInt(value[i + 3]) : 0;
+      var cell = !skipColumn[i] ? parseInt(value[i + 3]) : 0;
+      if (cell >= 0) {
+        cell = positives ? cell : 0;
+      } else if (negatives) {
+        if (!positives) {
+          cell = negatives ? -cell : 0;
+        }
+      } else {
+        cell = 0;
+      }
+      cohortRow[i] += cell;
     }
   });
+
+  // Integrate the points across multiple cohorts
+  if (pointType == 'left') {
+    // Only advance the current sum counter when we successfully find the
+    // next cohort. This happens because week or month grouping has no value
+    // lists for cohorts that do not start the grouping period.
+    var prevList = null;
+    for (var i = 0, n = cohortsInOrder.length; i < n; i++) {
+      var key = cohortsInOrder[i];
+      var valueList = cohorts[key];
+      if (!valueList) {
+        continue;
+      }
+      if (!prevList) {
+        prevList = valueList;
+        continue;
+      }
+      for (var j = 0, k = valueList.length; j < k; j++) {
+        valueList[j] += prevList[j];
+      }
+      prevList = valueList;
+    }
+  } else if (pointType == 'right') {
+    // Decaying function. Makes g(x) = integ(f, x to N) until g(x) has
+    // equalled the total sum twice, at which point it returns zero. This is
+    // kind of like a poor man's convolution function.
+    var completeSum = null;
+    var prevList = null;
+    for (var i = cohortsInOrder.length - 1; i >= 0; i--) {
+      var key = cohortsInOrder[i];
+      var valueList = cohorts[key];
+      if (!valueList) {
+        continue;
+      }
+      if (!completeSum) {
+        completeSum = valueList.map(function() { return 0; });
+      }
+      // Full integral
+      for (var j = 0, k = valueList.length; j < k; j++) {
+        completeSum[j] += valueList[j];
+      }
+      if (!prevList) {
+        prevList = valueList;
+        continue;
+      }
+      // Integral of X to N
+      for (var j = 0, k = valueList.length; j < k; j++) {
+        valueList[j] += prevList[j];
+      }
+      prevList = valueList;
+    }
+    // Drops points after the sum is reached
+    if (completeSum) {
+      var seenTotal = completeSum.map(function() { return false; });
+      for (var i = cohortsInOrder.length - 1; i >= 0; i--) {
+        var key = cohortsInOrder[i];
+        var valueList = cohorts[key];
+        if (!valueList) {
+          continue;
+        }
+      }
+    }
+  }
 
   // Save some metadata about the cohorts.
   var rowData = [];
   $.each(cohortsInOrder, function(index, key) {
     var valueList = cohorts[key];
-    var total = d3.sum(valueList || []);
+    var total = d3.max([0, d3.sum(valueList || [])]);
     rowData.push({
       cohort: key,
       x: index,
@@ -622,7 +707,7 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
     var point = {
       cohort: key,
       x: cohortsInOrder.indexOf(key),
-      y: stateCount,
+      y: d3.max([0, stateCount]),
       barWidth: cohortWidth[key] || 0,
       stateCount: stateCount,  // d3 will modify 'y' but not this
       stateName: header
@@ -686,10 +771,12 @@ function updateViz(rows, cause) {
   var includeStateNames = getEnabledStateNames();
   var normalized = getIsNormalized();
   var period = getPeriod();
+  var pointType = getPointType();
+  var includedSigns = getIncludedSigns();
 
   var view = filterData(
       rows, groupType, groupValues, totalGroupValues,
-      includeStateNames, period);
+      includeStateNames, period, pointType, includedSigns);
   var viewCohorts = view[0];
   var viewBarGroups = view[1];
 
@@ -956,6 +1043,12 @@ function init() {
   $('#normalize-check').click(trigger('normalize'));
   $('input:radio[name=\'period\']')
       .click(trigger('period'))
+      .click(clearInfoPanel);
+  $('input:radio[name=\'point_type\']')
+      .click(trigger('point_type'))
+      .click(clearInfoPanel);
+  $('input:radio[name=\'sign\']')
+      .click(trigger('sign'))
       .click(clearInfoPanel);
 
   $(window).resize(trigger('resize'));
