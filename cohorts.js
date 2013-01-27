@@ -226,7 +226,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-up">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('&#x2211;&uarr;')
+      .html('X / &#x2211;&uarr;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -238,7 +238,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-down">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('&#x2211;&darr;')
+      .html('X / &#x2211;&darr;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -250,7 +250,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-left">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('&#x2211;&larr;')
+      .html('X / &#x2211;&larr;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -262,7 +262,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-right">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('&#x2211;&rarr;')
+      .html('X / &#x2211;&rarr;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -274,7 +274,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-horizontal">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('&#x2211;&#x2194;')
+      .html('X / &#x2211;&#x2194;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -299,6 +299,30 @@ function createLegend(rowsWithHeader) {
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
       .html('&#x2211;&rarr; / &#x2211;&#x2194;')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
+  // Add row for x over max
+  var row = $('<div class="legend-max-ratio">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('X / Max')
+      .appendTo(row);
+  $('<div class="legend-value">')
+      .appendTo(row);
+  $('<div class="legend-percentage">')
+      .appendTo(row);
+  calcTable.append(row);
+
+  // Add row for 1 - (x over max)
+  var row = $('<div class="legend-complement-max-ratio">');
+  $('<div class="legend-box">').appendTo(row);
+  $('<div class="legend-label">')
+      .html('1 - X / Max')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -345,6 +369,10 @@ function clearInfoPanelMouseDetail() {
   calcLegend.find('.legend-cumulative-left-ratio>.legend-percentage').text('');
   calcLegend.find('.legend-cumulative-right-ratio>.legend-value').text('');
   calcLegend.find('.legend-cumulative-right-ratio>.legend-percentage').text('');
+  calcLegend.find('.legend-max-ratio>.legend-value').text('');
+  calcLegend.find('.legend-max-ratio>.legend-percentage').text('');
+  calcLegend.find('.legend-complement-max-ratio>.legend-value').text('');
+  calcLegend.find('.legend-complement-max-ratio>.legend-percentage').text('');
 }
 
 
@@ -418,6 +446,7 @@ function updateInfoPanel(cohort, highlightStateName) {
   // Count up totals for the highlighted state name horizontally across cohorts.
   var sumLeft = 0;
   var sumHorizontal = 0;
+  var maxHorizontal = 0;
   if (!!highlightStateName) {
     var format = d3.time.format("%m/%d/%y");
     var highlightedCohortTime = format.parse(cohort);
@@ -433,6 +462,9 @@ function updateInfoPanel(cohort, highlightStateName) {
       sumHorizontal += stateCount;
       if (cohort <= highlightedCohortTime) {
         sumLeft += stateCount;
+      }
+      if (stateCount > maxHorizontal) {
+        maxHorizontal = stateCount;
       }
     });
   }
@@ -487,6 +519,14 @@ function updateInfoPanel(cohort, highlightStateName) {
     calcLegend.find('.legend-cumulative-left-ratio>.legend-value').text('');
     calcLegend.find('.legend-cumulative-left-ratio>.legend-percentage')
       .text(format(sumLeft ? sumLeft / sumHorizontal : 0));
+
+    calcLegend.find('.legend-max-ratio>.legend-value').text('');
+    calcLegend.find('.legend-max-ratio>.legend-percentage')
+      .text(format(maxHorizontal ? highlightedCount / maxHorizontal : 0));
+
+    calcLegend.find('.legend-complement-max-ratio>.legend-value').text('');
+    calcLegend.find('.legend-complement-max-ratio>.legend-percentage')
+      .text(format(maxHorizontal ? 1 - highlightedCount / maxHorizontal : 0));
   } else {
     clearInfoPanelMouseDetail();
   }
@@ -618,7 +658,7 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   });
 
   // Integrate the points across multiple cohorts
-  if (pointType == 'left') {
+  if (pointType == 'cumulative') {
     // Only advance the current sum counter when we successfully find the
     // next cohort. This happens because week or month grouping has no value
     // lists for cohorts that do not start the grouping period.
@@ -637,46 +677,6 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
         valueList[j] += prevList[j];
       }
       prevList = valueList;
-    }
-  } else if (pointType == 'right') {
-    // Decaying function. Makes g(x) = integ(f, x to N) until g(x) has
-    // equalled the total sum twice, at which point it returns zero. This is
-    // kind of like a poor man's convolution function.
-    var completeSum = null;
-    var prevList = null;
-    for (var i = cohortsInOrder.length - 1; i >= 0; i--) {
-      var key = cohortsInOrder[i];
-      var valueList = cohorts[key];
-      if (!valueList) {
-        continue;
-      }
-      if (!completeSum) {
-        completeSum = valueList.map(function() { return 0; });
-      }
-      // Full integral
-      for (var j = 0, k = valueList.length; j < k; j++) {
-        completeSum[j] += valueList[j];
-      }
-      if (!prevList) {
-        prevList = valueList;
-        continue;
-      }
-      // Integral of X to N
-      for (var j = 0, k = valueList.length; j < k; j++) {
-        valueList[j] += prevList[j];
-      }
-      prevList = valueList;
-    }
-    // Drops points after the sum is reached
-    if (completeSum) {
-      var seenTotal = completeSum.map(function() { return false; });
-      for (var i = cohortsInOrder.length - 1; i >= 0; i--) {
-        var key = cohortsInOrder[i];
-        var valueList = cohorts[key];
-        if (!valueList) {
-          continue;
-        }
-      }
     }
   }
 

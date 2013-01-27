@@ -5,18 +5,3 @@ Features
 
 Bugs
 - X axis is truncated at the last label; it should keep going to the end
-
-
-
-Thoughts on other visualizations:
-
-* User Retention
-
-* Activity by user age
-Here the cohorts would be the birthdays of the user *actions* not the users themselves. State columns are the ages of the users in months, descending (Month 9, Month 8, Month 7, ...). For each cohort day, count the number of acitivites a user has done towards the activity you care about. The cohort group types would be the types of activities. Cohort group values would be specific activities to measure. Importantly, users of age "Month 0" would not show up in cohorts from 30 days ago, since that's not possible.
-
-Concrete example for a social network.
-- Cohort group type "followers". Group values: "Followed someone else", "Got followed". Each cohort day would show amount of activity on that day, split by how old the user way. Normalized view would tell you percentage of activites from younger users versus older users.
-
-
-* Churn: TBD

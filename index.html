@@ -91,16 +91,12 @@
         </div>
         <div class="section-content">
           <div>
-            <input type="radio" name="point_type" id="point-rate" value="rate" checked>
+            <input type="radio" name="point_type" id="point-rate" value="points" checked>
             <label for="point-rate" title="Datapoints are independently">Points</label>
           </div>
           <div>
-            <input type="radio" name="point_type" id="point-left" value="left">
+            <input type="radio" name="point_type" id="point-left" value="cumulative">
             <label for="point-left" title="Cumulative sum">Cumulative</label>
-          </div>
-          <div>
-            <input type="radio" name="point_type" id="point-right" value="right">
-            <label for="point-right" title="Diminishing sum">Diminishing</label>
           </div>
         </div>
       </div>
@@ -120,7 +116,7 @@
           </div>
           <div>
             <input type="radio" name="sign" id="both-check" value="both">
-            <label for="both-check" title="Positive and negative values">Both (min 0)</label>
+            <label for="both-check" title="Positive and negative values">Both</label>
           </div>
         </div>
       </div>
@@ -146,7 +142,7 @@
 
     <div class="section">
       <div class="section-header">
-        Calculations<span class="section-header-small"> &ndash; % is X / ∑</span>
+        Calculations
       </div>
       <div id="calc_legend" class="section-content"></div>
     </div>
