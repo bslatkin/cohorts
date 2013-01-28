@@ -464,6 +464,8 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
     row with one group value; aka the tuple (group value, cohort day) should be
     a unique row for each cohort group type. Order of the rows does not matter.
   </p>
+
+  <h3>Example CSV</h3>
   <p>
     Here's a simple example for a fake social network with "Sign-up Referrer",
     "Favorite feature", and "Total" cohort group types. This only counts a user
@@ -570,16 +572,17 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
       </tr>
     </table>
   </p>
+
+  <h3>Negative values</h3>
   <p>
-    Negative values: The sign of a state value is treated specially. The
-    cohort data may include two rows with the same (group value, cohort day)
-    tuple, but one with all positive column values, and one with all negative
-    column values. Example usage: When a user joins your service, have a
-    positive value on their birthday. When the same user leaves the service,
-    have the same negative value on their leave date. This lets you see the
-    rate of sign-ups and drop-offs independently. If you view both positive and
-    negative values cumulatively, you will plot your peak active users over
-    time.
+    The sign of a column value is treated specially. The cohort data may include
+    two rows with the same (group value, cohort day) tuple, but one with all
+    positive column values, and one with all negative column values. Example
+    usage: When a user joins your service, have a positive value on their
+    birthday. When the same user leaves the service, have the same negative
+    value on their leave date. This lets you see the rate of sign-ups and drop-
+    offs independently. If you view both positive and negative values
+    cumulatively, you will plot your peak active users over time.
   </p>
 </div>
 
@@ -646,7 +649,7 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
   </p>
   <p>
     <br>
-    Built using <a href="http://www.jquery.org">jQuery</a>, <a href="http://d3js.org/">D3</a>, <a href="http://code.google.com/p/jquery-csv/">jQuery CSV</a>, <a href="http://www.google.com/webfonts">Web Fonts</a>, and <a href="http://subtlepatterns.com/">Subtle Patterns</a>
+    Built using <a href="http://d3js.org/">D3</a>, <a href="http://www.jquery.org">jQuery</a>, <a href="http://code.google.com/p/jquery-csv/">jQuery CSV</a>, <a href="http://www.google.com/webfonts">Web Fonts</a>, and <a href="http://subtlepatterns.com/">Subtle Patterns</a>
   </p>
 </div>
 

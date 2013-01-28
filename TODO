@@ -5,3 +5,4 @@ Features
 
 Bugs
 - X axis is truncated at the last label; it should keep going to the end
+- For cumulative point type mode, treat missing cohort days as all zeros and fill them with the current cumulative sum, so it's just a flat continuation of the previous day.
