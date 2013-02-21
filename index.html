@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Cohort Visualizer &raquo; A handy tool for browsing cohort datasets</title>
   <meta name="description" content="A cohort is a group of people who share a common characteristic or experience within a defined period. This is a handy tool for browsing cohort datasets.">
+  <meta name="viewport" content="width=device-width" />
 
   <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8">
 
@@ -32,12 +33,12 @@
   <span class="sub-title">A handy tool for browsing cohort datasets</span>
 </div>
 
-<a href="https://github.com/bslatkin/cohorts"><img style="position: absolute; top: 0; right: 0; border: 0; width: 120px; height: 120px;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+<a class="fork-me" href="https://github.com/bslatkin/cohorts"><img style="position: absolute; top: 0; right: 0; border: 0; width: 120px; height: 120px;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
 
 <div id="viz_container">
 
   <div id="viz_title1">
-    <input class="viz-title fancy-bg" type="text" size="50" placeholder="Enter a graph title here">
+    <input class="viz-title fancy-bg" type="text" placeholder="Enter a graph title here">
   </div>
 
   <div id="viz_graph1" class="chart-cell">
@@ -162,7 +163,7 @@
   </p>
   <p>
 
-<textarea cols="120" rows="15" id="data">
+<textarea rows="15" id="data">
 Cohort group type,Cohort group value,Cohort day,Born,Updated profile,Sent first message,Unlocked first achievement,Made two posts
 Total,,10/18/12,55,26,244,146,135
 Total,,10/19/12,57,27,246,147,142
@@ -473,104 +474,106 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
     total row. In the case of "Total" the only valid grouping value is the empty
     string, which this tool treats specially.
 
-    <table class="example-table">
-      <tr>
-        <th>Cohort group type</th>
-        <th>Cohort group value</th>
-        <th>Cohort day</th>
-        <th>Born</th>
-        <th>Updated profile</th>
-        <th>Sent first message</th>
-      </tr>
+    <div class="example-table-container">
+      <table class="example-table">
+        <tr>
+          <th>Cohort group type</th>
+          <th>Cohort group value</th>
+          <th>Cohort day</th>
+          <th>Born</th>
+          <th>Updated profile</th>
+          <th>Sent first message</th>
+        </tr>
 
-      <!-- Sign-up referrer -->
-      <tr>
-        <td>Sign-up referrer</td>
-        <td>Search</td>
-        <td>10/25/12</td>
-        <td>5</td>
-        <td>5</td>
-        <td>5</td>
-      </tr>
-      <tr>
-        <td>Sign-up referrer</td>
-        <td>Search</td>
-        <td>10/25/12</td>
-        <td>10</td>
-        <td>10</td>
-        <td>0</td>
-      </tr>
+        <!-- Sign-up referrer -->
+        <tr>
+          <td>Sign-up referrer</td>
+          <td>Search</td>
+          <td>10/25/12</td>
+          <td>5</td>
+          <td>5</td>
+          <td>5</td>
+        </tr>
+        <tr>
+          <td>Sign-up referrer</td>
+          <td>Search</td>
+          <td>10/25/12</td>
+          <td>10</td>
+          <td>10</td>
+          <td>0</td>
+        </tr>
 
-      <tr>
-        <td>Sign-up referrer</td>
-        <td>Email</td>
-        <td>10/26/12</td>
-        <td>5</td>
-        <td>5</td>
-        <td>5</td>
-      </tr>
-      <tr>
-        <td>Sign-up referrer</td>
-        <td>Email</td>
-        <td>10/26/12</td>
-        <td>5</td>
-        <td>0</td>
-        <td>5</td>
-      </tr>
+        <tr>
+          <td>Sign-up referrer</td>
+          <td>Email</td>
+          <td>10/26/12</td>
+          <td>5</td>
+          <td>5</td>
+          <td>5</td>
+        </tr>
+        <tr>
+          <td>Sign-up referrer</td>
+          <td>Email</td>
+          <td>10/26/12</td>
+          <td>5</td>
+          <td>0</td>
+          <td>5</td>
+        </tr>
 
-      <!-- Favorite feature -->
-      <tr>
-        <td>Favorite feature</td>
-        <td>Chat</td>
-        <td>10/25/12</td>
-        <td>0</td>
-        <td>5</td>
-        <td>10</td>
-      </tr>
-      <tr>
-        <td>Favorite feature</td>
-        <td>Chat</td>
-        <td>10/26/12</td>
-        <td>15</td>
-        <td>5</td>
-        <td>0</td>
-      </tr>
+        <!-- Favorite feature -->
+        <tr>
+          <td>Favorite feature</td>
+          <td>Chat</td>
+          <td>10/25/12</td>
+          <td>0</td>
+          <td>5</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>Favorite feature</td>
+          <td>Chat</td>
+          <td>10/26/12</td>
+          <td>15</td>
+          <td>5</td>
+          <td>0</td>
+        </tr>
 
-      <tr>
-        <td>Favorite feature</td>
-        <td>Reading news</td>
-        <td>10/25/12</td>
-        <td>10</td>
-        <td>5</td>
-        <td>0</td>
-      </tr>
-      <tr>
-        <td>Favorite feature</td>
-        <td>Reading news</td>
-        <td>10/26/12</td>
-        <td>5</td>
-        <td>5</td>
-        <td>5</td>
-      </tr>
+        <tr>
+          <td>Favorite feature</td>
+          <td>Reading news</td>
+          <td>10/25/12</td>
+          <td>10</td>
+          <td>5</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <td>Favorite feature</td>
+          <td>Reading news</td>
+          <td>10/26/12</td>
+          <td>5</td>
+          <td>5</td>
+          <td>5</td>
+        </tr>
 
-      <!-- Total -->
-      <tr>
-        <td>Total</td>
-        <td></td>
-        <td>10/25/12</td>
-        <td>10</td>
-        <td>10</td>
-        <td>10</td>
-      </tr>
-      <tr>
-        <td>Total</td>
-        <td></td>
-        <td>10/26/12</td>
-        <td>20</td>
-        <td>10</td>
-        <td>5</td>
-      </tr>
-    </table>
+        <!-- Total -->
+        <tr>
+          <td>Total</td>
+          <td></td>
+          <td>10/25/12</td>
+          <td>10</td>
+          <td>10</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>Total</td>
+          <td></td>
+          <td>10/26/12</td>
+          <td>20</td>
+          <td>10</td>
+          <td>5</td>
+        </tr>
+      </table>
+    </div>
   </p>
 
   <h3>Negative values</h3>

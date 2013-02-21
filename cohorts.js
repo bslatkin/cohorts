@@ -784,13 +784,15 @@ function updateViz(rows, cause) {
   //             '", values="' + (groupValues.join('|')) +
   //             '"; ' + viewCohorts.length + ' rows found');
 
-  // Scale graph to whole window area, with minimum
-  var height = 500;
-  var width = $(window).width() - 100;
-  if (width < 500) {
-    width = 500;
+  // Scale graph to whole window area, with minimum.
+  var width = $(window).width() - 50;
+  if (width < 100) {
+    width = 100;
   }
   $('#viz_container').width(width);
+
+  // Obey the height of the container.
+  var height = $('#viz_graph1').height();
 
   // Put margins around the graphs so the axes render without clipping
   var marginX = 50;
@@ -929,6 +931,7 @@ function updateViz(rows, cause) {
         .duration(0)
         .attr('data-state-count', getStateCount)
         .attr('width', getWidth)
+        .attr('height', getHeight)
         .attr('x', getX)
         .attr('y', getY);
   } else {

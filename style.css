@@ -45,9 +45,18 @@ a:link, a:visited, a:active, a:hover {
 }
 .main-title {
   display: inline;
+  padding-right: 20px;
 }
 .sub-title {
-  padding-left: 20px;
+  display: inline-block;
+}
+.fork-me {
+  display: none;
+}
+@media (min-width: 1025px) {
+  .fork-me {
+    display: block;
+  }
 }
 
 .clear {
@@ -57,17 +66,25 @@ a:link, a:visited, a:active, a:hover {
 #explanation,
 #explanation textarea {
   max-width: 700px;
+  width: 100%;
+  box-sizing: border-box;
 }
 #explanation {
   margin-top: 30px;
 }
 
 #viz_container {
-  margin: 30px auto 30px auto;
+  margin: 0 auto;
   text-align: left;
   padding: 0 10px;
 }
-
+@media (min-width: 1025px) {
+  #viz_container {
+    margin: 30px auto 30px auto;
+    text-align: left;
+    padding: 0 10px;
+  }
+}
 #below-area {
 }
 #control-section {
@@ -76,9 +93,11 @@ a:link, a:visited, a:active, a:hover {
   -moz-column-break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
-.below-area-column-wrap {
-  -moz-column-width: 300px;
-  -webkit-column-width: 300px;
+@media (min-width: 600px) {
+  .below-area-column-wrap {
+    -moz-column-width: 280px;
+    -webkit-column-width: 280px;
+  }
 }
 #legend-section {
   -moz-column-break-before: always;
@@ -98,6 +117,12 @@ a:link, a:visited, a:active, a:hover {
 
 #viz_graph1 {
   text-align: center;
+  height: 200px;
+}
+@media (min-height: 800px) and (min-width: 1025px) {
+  #viz_graph1 {
+    height: 500px;
+  }
 }
 
 .viz-title {
@@ -106,6 +131,7 @@ a:link, a:visited, a:active, a:hover {
   font-size: 18px;
   font-weight: bold;
   font-family: 'Sanchez', serif;
+  width: 100%;
 }
 
 .axis path,
@@ -192,6 +218,11 @@ a:link, a:visited, a:active, a:hover {
   opacity: 0.5;
 }
 
+.example-table-container {
+  width: 100%;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
 .example-table td, .example-table th {
   text-align: left;
   vertical-align: top;
