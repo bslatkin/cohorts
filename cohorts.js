@@ -226,7 +226,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-up">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('X / &#x2211;&uarr;')
+      .html('&#x2211;&uarr; / &#x2211;&#x2195;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -238,7 +238,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-cumulative-down">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('X / &#x2211;&darr;')
+      .html('&#x2211;&darr; / &#x2211;&#x2195;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -310,7 +310,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-max-ratio">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('X / Max')
+      .html('X / Max &#x2194;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);
@@ -322,7 +322,7 @@ function createLegend(rowsWithHeader) {
   var row = $('<div class="legend-complement-max-ratio">');
   $('<div class="legend-box">').appendTo(row);
   $('<div class="legend-label">')
-      .html('1 - X / Max')
+      .html('1 - X / Max &#x2194;')
       .appendTo(row);
   $('<div class="legend-value">')
       .appendTo(row);

@@ -2,6 +2,12 @@ Features
 - Filter for group values by regex
 - Filter cohorts by start/end
 - Accept file upload or drag/drop of the CSV file
+- Negative axis for negative values; move axis to top and have values go down
+- Combine positive/negative stacked bar charts by putting the delta between positive and negative in the stack above or below; indicate the zero point with a thick line; make the line red when it's negative, black when it's positive.
+
+Help
+- Other datasets (funnel, retention, sales) that can be loaded as examples with a single click; preconfigures the view settings.
+- Help manual that explains common operations, screenshots of the visualizations they generate.
 
 Bugs
 - X axis is truncated at the last label; it should keep going to the end
