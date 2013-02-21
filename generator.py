@@ -5,9 +5,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,11 @@ COLUMNS = [
   'Sent first message',
   'Unlocked first achievement',
   'Made two posts',
-] + ['State ' + a for a in string.ascii_lowercase]
+]
+# For profiling viz performance
+# ] + [
+#  'State ' + a for a in string.ascii_lowercase
+# ]
 
 
 out = csv.writer(sys.stdout)
@@ -43,22 +47,49 @@ group_types = [
   ('Total', ['']),
   ('Sign-up referrer', ['Email', 'Search', 'Coupon', 'Tweet']),
   ('Favorite feature', ['Chat', 'Reading news', 'Fun facts', 'Polls']),
-  ('Big Random', ['Value ' + a for a in string.ascii_lowercase]),
+  # For profiling viz performance
+  # ('Big Random', ['Value ' + a for a in string.ascii_lowercase]),
 ]
 
-duration = 300
+duration = 150
 step = math.pi / duration / 2
 wave_start = {}
 wave_size = {}
+wave_period = {}
+dropped = {}
+peaked = {}
 
-def do_wave(i, x):
+
+def do_wave(group, state, i, x):
   # Create a new random wave starting point if it doesn't exist.
   if i not in wave_start:
-    wave_start[i] = random.random() * -math.pi + 3 * len(wave_start) * step
-    wave_size[i] = len(wave_start) * 50 * random.random()
+    wave_period[i] = max(1, random.random() * 1.5)
+    wave_start[i] = math.pi + random.random() * math.pi
+    wave_size[i] = max(100, 500 * random.random())
+
+  # Mix in a random peak
+
+  # Mix in a random drop
+  if group not in dropped and x > duration / 2.0 and random.random() > 0.95:
+    sign = round(-random.random()) or 1.0
+    amount = max(3, random.random() * 5) ** sign
+    dropped[group] = (state, x, amount)
+
+  size = wave_size[i]
+  if group in dropped:
+    drop_state, drop_x, amount = dropped[group]
+    if state == drop_state and x > drop_x:
+      size *= amount
+
+  # Adjust the X axis for the period of the wave, which may be less than
+  # duration to make things look out of phase.
+  radians = wave_start[i] + x * step * wave_period[i]
+
+  # Mix in random noise
+  noise = math.cos(radians) * random.random()
 
   return int(
-    (1 + math.cos(wave_start[i] + x * step)) * wave_size[i]
+    (1 + math.cos(radians) + noise) * size
   )
 
 
@@ -80,6 +111,6 @@ for type_number, group in enumerate(group_types):
         cohort,
       ]
       for i in xrange(len(COLUMNS) - 3):
-        row.append(do_wave(wave_index + i, x))
+        row.append(do_wave(type_number, i, wave_index + i, x))
 
       out.writerow(row)
