@@ -68,14 +68,30 @@ def do_wave(group, state, i, x):
     wave_size[i] = max(100, 500 * random.random())
 
   # Mix in a random peak
+  if (group not in peaked and
+      x > (1.0 * duration / 3.0) and
+      random.random() > 0.95):
+    amount = max(2, random.random() * 4)
+    peaked[group] = (state, x, amount)
 
   # Mix in a random drop
-  if group not in dropped and x > duration / 2.0 and random.random() > 0.95:
+  if (group not in dropped and
+      x > (2.0 * duration / 3.0) and
+      random.random() > 0.95):
     sign = round(-random.random()) or 1.0
     amount = max(3, random.random() * 5) ** sign
     dropped[group] = (state, x, amount)
 
+  # Apply size adjustments
   size = wave_size[i]
+  if group in peaked:
+    peaked_state, peaked_x, amount = peaked[group]
+    peak_length = duration / 15.0
+    if state == peaked_state and peaked_x < x < (peaked_x + peak_length):
+      offset = (x - peaked_x) / peak_length
+      amount *= 1 + math.cos(math.pi + 2 * math.pi * offset)
+      size *= amount
+
   if group in dropped:
     drop_state, drop_x, amount = dropped[group]
     if state == drop_state and x > drop_x:
