@@ -221,7 +221,7 @@ a:link, a:visited, a:active, a:hover {
 .example-table-container {
   width: 100%;
   overflow-y: hidden;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 .example-table td, .example-table th {
   text-align: left;
