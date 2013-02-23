@@ -68,9 +68,13 @@ a:link, a:visited, a:active, a:hover {
   max-width: 700px;
   width: 100%;
   box-sizing: border-box;
+  -moz-box-sizing: border-box;
 }
 #explanation {
   margin-top: 30px;
+}
+.quiet {
+  color: #999;
 }
 
 #viz_container {
@@ -88,9 +92,9 @@ a:link, a:visited, a:active, a:hover {
 #below-area {
 }
 #control-section {
-  -moz-column-break-after: always;
+  break-after: always;
+  break-inside: avoid;
   -webkit-column-break-after: always;
-  -moz-column-break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
 @media (min-width: 600px) {
@@ -100,11 +104,11 @@ a:link, a:visited, a:active, a:hover {
   }
 }
 #legend-section {
-  -moz-column-break-before: always;
+  break-always: always;
   -webkit-column-break-before: always;
 }
 .legend-row {
-  -moz-column-break-inside: avoid;
+  break-inside: always;
   -webkit-column-break-inside: avoid;
 }
 
@@ -149,8 +153,7 @@ a:link, a:visited, a:active, a:hover {
   cursor: crosshair;
 }
 .section {
-  column-break-inside: avoid;
-  -moz-column-break-inside: avoid;
+  break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
 .section-content {
@@ -228,3 +231,46 @@ a:link, a:visited, a:active, a:hover {
   vertical-align: top;
   padding: 0 10px;
 }
+
+.drop-info,
+.drop-target {
+  display: none;
+}
+.drag-active .drop-info,
+.drag-active .drop-target {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.drop-target {
+  z-index: 100;
+}
+.drop-info {
+  z-index: 99;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: 10px dotted rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  margin: 8px;
+}
+.drop-message-container {
+  height: 100%;
+  width: 100%;
+  display: -moz-box;
+  -moz-box-orient: vertical;
+  -moz-box-pack: center;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-pack: center;
+  text-align: center;
+}
+.drop-message {
+  display: inline;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  font-size: 40px;
+}
+

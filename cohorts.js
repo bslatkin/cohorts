@@ -998,9 +998,20 @@ function updateViz(rows, cause) {
 }
 
 
-function handleClickVisualize() {
+function handleVisualizeSafe(data) {
+  try {
+    handleVisualize(data);
+  } catch (e) {
+    alert('Something is wrong with your data!');
+    console.log('Something is wrong with your data!');
+    console.log(e);
+  }
+}
+
+
+function handleVisualize(data) {
   // Parse the CSV data
-  var rowsWithHeader = $.csv.toArrays($('#data').val());
+  var rowsWithHeader = $.csv.toArrays(data);
   var groupTypes = extractGroupTypes(rowsWithHeader);
 
   // Setup UI
@@ -1034,6 +1045,11 @@ function handleClickVisualize() {
 }
 
 
+function handleClickVisualize() {
+  handleVisualizeSafe($('#data').val());
+}
+
+
 function init() {
   $('#visualize_my_data').click(handleClickVisualize);
 
@@ -1058,7 +1074,37 @@ function init() {
 
   // SVG's "class" attribute is not .className, but something else:
   // See http://stackoverflow.com/a/5875087
-  $(document).on('mouseenter mouseleave', 'rect[class="bar"]', handleInfoPanel);
+  $(document).on('mouseenter mouseleave', 'rect[class="bar"]',
+                 handleInfoPanel);
+
+  // Enable drag/drop of CSV files.
+  $('body').bind('dragenter', function(e) {
+    $('body').addClass('drag-active');
+  });
+  $('.drop-target').bind('dragleave', function(e) {
+    $('body').removeClass('drag-active');
+  });
+  $('.drop-target').bind('dragover', function(e) {
+    e.preventDefault();
+  });
+  $('.drop-target').bind('drop', function(e) {
+    $('body').removeClass('drag-active');
+    e.preventDefault();
+
+    if (e.originalEvent.dataTransfer.files.length != 1) {
+      return true;
+    }
+    var sourceFile = e.originalEvent.dataTransfer.files.item(0);
+    if (sourceFile.type != 'text/csv') {
+      return true;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      handleVisualizeSafe(reader.result);
+    };
+    reader.readAsText(e.originalEvent.dataTransfer.files.item(0));
+  });
 
   // Start off with the dummy data that's in the textarea on page load.
   handleClickVisualize();
