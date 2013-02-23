@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Generates fake funnel cohort data for demo purposes."""
+"""Generates fake usage and retention cohort data for demo purposes."""
 
 import csv
 import datetime
@@ -23,91 +23,75 @@ import random
 import string
 import sys
 
-
+duration = 300
 
 COLUMNS = [
   'Cohort group type',
   'Cohort group value',
   'Cohort day',
+] + [
+  'Month %d' % i for i in xrange(duration / 30 - 1, 0, -1)
+]
+
+out = csv.writer(sys.stdout)
+out.writerow(COLUMNS)
+
+FUNNEL_STATES = [
   'Born',
   'Updated profile',
   'Sent first message',
   'Unlocked first achievement',
   'Made two posts',
 ]
-# For profiling viz performance
-# ] + [
-#  'State ' + a for a in string.ascii_lowercase
-# ]
-
-
-out = csv.writer(sys.stdout)
-out.writerow(COLUMNS)
 
 group_types = [
-  ('Total', ['']),
-  ('Sign-up referrer', ['Email', 'Search', 'Coupon', 'Tweet']),
-  ('Favorite feature', ['Chat', 'Reading news', 'Fun facts', 'Polls']),
-  # For profiling viz performance
-  # ('Big Random', ['Value ' + a for a in string.ascii_lowercase]),
+  ('Last active day', FUNNEL_STATES),
+  ('Lifespan', FUNNEL_STATES),
 ]
 
-duration = 150
 step = math.pi / duration / 2
 wave_start = {}
 wave_size = {}
 wave_period = {}
-dropped = {}
 peaked = {}
+max_wave = {}
 
 
-def do_wave(group, state, i, x):
+def do_wave(group, value, state, i, x):
   # Create a new random wave starting point if it doesn't exist.
-  if i not in wave_start:
-    wave_period[i] = max(1, random.random() * 1.5)
-    wave_start[i] = math.pi + random.random() * math.pi
-    wave_size[i] = max(100, 500 * random.random())
+  # Share this across all values.
+  if value not in wave_start:
+    wave_period[value] = max(1, random.random() * 1.5)
+    wave_start[value] = math.pi + random.random() * math.pi
+    wave_size[value] = max(100, 500 * random.random())
 
   # Mix in a random peak
   if (group not in peaked and
       x > (1.0 * duration / 3.0) and
       random.random() > 0.95):
-    amount = max(2, random.random() * 4)
+    amount = max(1, random.random() * 2)
     peaked[group] = (state, x, amount)
 
-  # Mix in a random drop
-  if (group not in dropped and
-      x > (2.0 * duration / 3.0) and
-      random.random() > 0.95):
-    sign = round(-random.random()) or 1.0
-    amount = max(3, random.random() * 5) ** sign
-    dropped[group] = (state, x, amount)
-
   # Apply size adjustments
-  size = wave_size[i]
+  size = wave_size[value]
   if group in peaked:
     peaked_state, peaked_x, amount = peaked[group]
     peak_length = duration / 15.0
     if state == peaked_state and peaked_x < x < (peaked_x + peak_length):
       offset = (x - peaked_x) / peak_length
-      amount *= 1 + math.cos(math.pi + 2 * math.pi * offset)
-      size *= amount
-
-  if group in dropped:
-    drop_state, drop_x, amount = dropped[group]
-    if state == drop_state and x > drop_x:
+      amount *= 2 + math.cos(math.pi + 2 * math.pi * offset)
       size *= amount
 
   # Adjust the X axis for the period of the wave, which may be less than
   # duration to make things look out of phase.
-  radians = wave_start[i] + x * step * wave_period[i]
+  radians = wave_start[value] + x * step * wave_period[value]
 
   # Mix in random noise
   noise = math.cos(radians) * random.random()
 
-  return int(
+  return max(0, int(
     (1 + math.cos(radians) + noise) * size
-  )
+  ))
 
 
 start = datetime.date.today() - datetime.timedelta(days=duration)
@@ -128,6 +112,29 @@ for type_number, group in enumerate(group_types):
         cohort,
       ]
       for i in xrange(len(COLUMNS) - 3):
-        row.append(do_wave(type_number, i, wave_index + i, x))
+        # # i is "months back"; only output if this cohort is live.
+        # # This works for sign-up day.
+        # if (30 * (i+2)) >= x > (30 * (i+1)):
+        #   row.append(do_wave(type_number, value_number, i, wave_index + i, x))
+        # else:
+        #   row.append(0)
+
+        # Last active day should be the downward ramp.
+        x_churn_start = (30 * (i+1))
+        if x < x_churn_start:
+          # Not active until it's our month
+          row.append(0)
+        elif (30 + x_churn_start) >= x >= x_churn_start:
+          # First month of churn comes on quick
+          distance = float(x - x_churn_start) / 30
+          adjustment = math.sin(math.pi * distance / 2)
+          level = do_wave(type_number, value_number, i, wave_index + i, x)
+          row.append(int(adjustment * level))
+        else:
+          # After churn we slowly ramp down for the remainder
+          distance = float(x - x_churn_start) / duration
+          adjustment = (1 + math.cos(math.pi * distance)) / 2
+          level = do_wave(type_number, value_number, i, wave_index + i, x)
+          row.append(int(adjustment * level))
 
       out.writerow(row)
