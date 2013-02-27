@@ -30,7 +30,7 @@ COLUMNS = [
   'Cohort group value',
   'Cohort day',
 ] + [
-  'Month %d' % i for i in xrange(duration / 30 - 1, 0, -1)
+  'Month %d' % i for i in xrange(duration / 30 - 1, -1, -1)
 ]
 
 out = csv.writer(sys.stdout)
@@ -55,6 +55,7 @@ wave_size = {}
 wave_period = {}
 peaked = {}
 max_wave = {}
+total_value = {}
 
 
 def do_wave(group, value, state, i, x):
@@ -63,7 +64,7 @@ def do_wave(group, value, state, i, x):
   if value not in wave_start:
     wave_period[value] = max(1, random.random() * 1.5)
     wave_start[value] = math.pi + random.random() * math.pi
-    wave_size[value] = max(100, 500 * random.random())
+    wave_size[value] = max(100, 100 * random.random())
 
   # Mix in a random peak
   if (group not in peaked and
@@ -112,29 +113,31 @@ for type_number, group in enumerate(group_types):
         cohort,
       ]
       for i in xrange(len(COLUMNS) - 3):
-        # # i is "months back"; only output if this cohort is live.
-        # # This works for sign-up day.
-        # if (30 * (i+2)) >= x > (30 * (i+1)):
-        #   row.append(do_wave(type_number, value_number, i, wave_index + i, x))
-        # else:
-        #   row.append(0)
-
         # Last active day should be the downward ramp.
         x_churn_start = (30 * (i+1))
+        x_start = (30 * i)
         if x < x_churn_start:
-          # Not active until it's our month
-          row.append(0)
-        elif (30 + x_churn_start) >= x >= x_churn_start:
-          # First month of churn comes on quick
-          distance = float(x - x_churn_start) / 30
-          adjustment = math.sin(math.pi * distance / 2)
-          level = do_wave(type_number, value_number, i, wave_index + i, x)
-          row.append(int(adjustment * level))
+          if x < x_start:
+            # Not active until it's our month
+            row.append(0)
+          else:
+            # i is "months back"; only output if this cohort is live.
+            # This works for sign-up day.
+            next_value = do_wave(type_number, value_number, i, wave_index + i, x)
+            total_value[i] = total_value.get(i, 0) + next_value
+            row.append(next_value)
+
         else:
-          # After churn we slowly ramp down for the remainder
-          distance = float(x - x_churn_start) / duration
-          adjustment = (1 + math.cos(math.pi * distance)) / 2
-          level = do_wave(type_number, value_number, i, wave_index + i, x)
-          row.append(int(adjustment * level))
+          if total_value.get(i, 0) <= 0:
+            row.append(0)
+          else:
+            # After churn we slowly ramp down for the remainder
+            distance = float(x - x_churn_start) / duration * 0.8
+            adjustment = (1 + -math.cos(math.pi * distance)) / 2
+            level = do_wave(type_number, value_number, i, wave_index + i, x)
+            next_value = int(adjustment * level)
+            next_value = min(next_value, total_value[i])
+            total_value[i] -= next_value
+            row.append(-next_value)
 
       out.writerow(row)

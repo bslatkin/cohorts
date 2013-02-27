@@ -90,7 +90,7 @@ def do_wave(group, state, i, x):
     peak_length = duration / 15.0
     if state == peaked_state and peaked_x < x < (peaked_x + peak_length):
       offset = (x - peaked_x) / peak_length
-      amount *= 1 + math.cos(math.pi + 2 * math.pi * offset)
+      amount *= 2 + math.cos(math.pi + 2 * math.pi * offset)
       size *= amount
 
   if group in dropped:
