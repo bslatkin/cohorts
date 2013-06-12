@@ -614,8 +614,6 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
         var fillDate = d3.time.day.offset(lastDate, 1);
         var cohortString = format(fillDate);
         cohortsInOrder.push(cohortString);
-        console.log('Last: ' + lastCohortString + ', next: ' + value +
-                    ', filling: ' + cohortString);
         lastDate = fillDate;
       }
     }
