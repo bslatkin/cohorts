@@ -597,9 +597,29 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
       cohortsSet[cohortDay] = true;
     }
   });
-  var cohortsInOrder = []
-  $.each(cohortsSet, function(key, value) {
-    cohortsInOrder.push(key);
+  var cohortsWithGaps = []
+  $.each(cohortsSet, function(key) {
+    cohortsWithGaps.push(key);
+  });
+  cohortsWithGaps.sort(compareCohorts);
+
+  // Fill in any missing cohort days so cumulative data has no gaps.
+  var cohortsInOrder = [];
+  $.each(cohortsWithGaps, function(index, value) {
+    if (cohortsInOrder.length > 0) {
+      var lastCohortString = cohortsInOrder[cohortsInOrder.length - 1];
+      var lastDate = format.parse(lastCohortString);
+      var nextDate = format.parse(value);
+      while (d3.time.day.offset(lastDate, 1) < nextDate) {
+        var fillDate = d3.time.day.offset(lastDate, 1);
+        var cohortString = format(fillDate);
+        cohortsInOrder.push(cohortString);
+        console.log('Last: ' + lastCohortString + ', next: ' + value +
+                    ', filling: ' + cohortString);
+        lastDate = fillDate;
+      }
+    }
+    cohortsInOrder.push(value);
   });
   cohortsInOrder.sort(compareCohorts);
 
@@ -659,24 +679,24 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
 
   // Integrate the points across multiple cohorts
   if (pointType == 'cumulative') {
-    // Only advance the current sum counter when we successfully find the
-    // next cohort. This happens because week or month grouping has no value
-    // lists for cohorts that do not start the grouping period.
     var prevList = null;
     for (var i = 0, n = cohortsInOrder.length; i < n; i++) {
       var key = cohortsInOrder[i];
       var valueList = cohorts[key];
-      if (!valueList) {
-        continue;
-      }
-      if (!prevList) {
+      if (!valueList && prevList) {
+        // If the valueList doesn't exist for this cohort, then just keep
+        // the same value that was present in the last one.
+        cohorts[key] = prevList.slice();
+      } else if (valueList) {
+        if (!prevList) {
+          prevList = valueList;
+          continue;
+        }
+        for (var j = 0, k = valueList.length; j < k; j++) {
+          valueList[j] += prevList[j];
+        }
         prevList = valueList;
-        continue;
       }
-      for (var j = 0, k = valueList.length; j < k; j++) {
-        valueList[j] += prevList[j];
-      }
-      prevList = valueList;
     }
   }
 
@@ -968,10 +988,10 @@ function updateViz(rows, cause) {
 
   chart.selectAll('g.bottom.axis').remove();
 
-  chart.append("g")
-      .attr("class", "bottom axis")
-      .attr("transform", "translate(0," + (height - marginY) + ")")
-      .call(xAxis.orient("bottom"));
+  chart.append('g')
+      .attr('class', 'bottom axis')
+      .attr('transform', 'translate(0,' + (height - marginY) + ')')
+      .call(xAxis.orient('bottom'));
 
   // Vertical axis
   var yAxisScale = d3.time.scale()
