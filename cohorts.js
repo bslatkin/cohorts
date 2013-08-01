@@ -1029,7 +1029,7 @@ function handleVisualizeSafe(data) {
 
 function handleVisualize(data) {
   // Parse the CSV data
-  var rowsWithHeader = $.csv.toArrays(data);
+  var rowsWithHeader = d3.csv.parseRows(data);
   var groupTypes = extractGroupTypes(rowsWithHeader);
 
   // Setup UI
