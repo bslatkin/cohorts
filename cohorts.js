@@ -1071,7 +1071,8 @@ function handleClickVisualize() {
 function init() {
   var prefix = '?resource=';
   if (window.location.search.indexOf(prefix) == 0) {
-    var resourcePath = window.location.search.substr(prefix.length);
+    var resourcePath = decodeURIComponent(
+        window.location.search.substr(prefix.length));
     $.ajax({
       url: resourcePath,
       success: function(data) {
