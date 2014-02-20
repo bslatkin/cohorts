@@ -273,4 +273,32 @@ a:link, a:visited, a:active, a:hover {
   padding: 10px;
   font-size: 40px;
 }
-
+.question-mark {
+  font-family: Georgia;
+  font-weight: bold;
+  display: inline-block;
+  border-radius: 12px;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0;
+  color: #000;
+  background-color: #ccc;
+  text-decoration: none;
+}
+.single-calculation {
+  margin: 2em 0;
+}
+.calculations-formula {
+  font-size: 16px;
+}
+.calculations-short-name {
+  font-size: 16px;
+  margin: 16px;
+  display: block;
+}
+.calculations-description {
+  margin: 16px;
+}
