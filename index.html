@@ -645,70 +645,108 @@ Favorite feature,Polls,11/16/12,90,35,186,153,19
 <h1 id="calculations">Calculuations</h1>
 <div>
 <p>
-Here's a quick guide to the calculations presented on the right. A "bar" is every cohort for a particualr day. A "bar segment" is one part of the bar for a day in single color, corresponding to a particular "cohort state" (like "Made two posts" above), which is usually some level of progression in the funnel.
+Here's a quick guide to the calculations presented on the right. A "bar" is
+every cohort for a particular day. A "bar segment" is one part of the bar for a
+day in single color, corresponding to a particular "cohort state" (like "Made
+two posts" above), which is usually some level of progression in the funnel.
 </p>
 <p class="calculations-legend">
   <div class="single-calculation">
     <span class="calculations-formula">∑↑&nbsp;/&nbsp;∑↕</span>
     <span class="calculations-short-name">"Percentage here and up"</span>
     <div class="calculations-description">
-      Sum the bar your mouse is over vertically upward, including the bar segment your mouse is on top of. Then divide by the total sum for that bar vertically. Answers: "On this day, what percentage of users are beyond and including this cohort state in the funnel?" For the bottom bar segment this will be 100%.
+      Sum the bar your mouse is over vertically upward, including the bar
+      segment your mouse is on top of. Then divide by the total sum for that bar
+      vertically. Answers: "On this day, what percentage of users are beyond and
+      including this cohort state in the funnel?" For the bottom bar segment
+      this will be 100%.
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">∑↓&nbsp;/&nbsp;∑↕</span>
     <span class="calculations-short-name">"Percentage here and down"</span>
     <div class="calculations-description">
-      Sum the bar your mouse is over vertically downward, including the bar segment your mouse is on top of. Then divide by the total sum for that bar vertically. Answers: "On this day, what percentage of users are before and including this cohort state in the funnel?" For the top bar segment this will be 100%.
+      Sum the bar your mouse is over vertically downward, including the bar
+      segment your mouse is on top of. Then divide by the total sum for that bar
+      vertically. Answers: "On this day, what percentage of users are before and
+      including this cohort state in the funnel?" For the top bar segment this
+      will be 100%.
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">X&nbsp;/&nbsp;∑←</span>
     <span class="calculations-short-name">"Percentage here of cumulative past sum"</span>
     <div class="calculations-description">
-      Sum all bar segments from the cohort state you have your mouse over going back in time to the left, including the one your mouse is over. Divide the bar segment you have your mouse over by that sum. Answers: "What percentage of users does the highlighted bar segment represent as part of the whole past for that cohort state, including this day?"
+      Sum all bar segments from the cohort state you have your mouse over going
+      back in time to the left, including the one your mouse is over. Divide the
+      bar segment you have your mouse over by that sum. Answers: "What
+      percentage of users does the highlighted bar segment represent as part of
+      the whole past for that cohort state, including this day?"
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">X&nbsp;/&nbsp;∑→</span>
     <span class="calculations-short-name">"Percentage here of cumulative future sum"</span>
     <div class="calculations-description">
-      Sum all bar segments from the cohort state you have your mouse over going forward in time to the right, including the one your mouse is over. Divide the bar segment you have your mouse over by that sum. Answers: "What percentage of users does the highlighted bar segment represent as part of the whole future for that cohort state, including this day?"
+      Sum all bar segments from the cohort state you have your mouse over going
+      forward in time to the right, including the one your mouse is over. Divide
+      the bar segment you have your mouse over by that sum. Answers: "What
+      percentage of users does the highlighted bar segment represent as part of
+      the whole future for that cohort state, including this day?"
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">X&nbsp;/&nbsp;∑↔</span>
     <span class="calculations-short-name">"Percentage here of cumulative sum over time"</span>
     <div class="calculations-description">
-      Sum all bar segments for the cohort state you have your mouse over for all days. Divide the bar segment you have your mouse over by that sum. Answers: "What percentage of users does the highlighted bar segment represent over all time for that cohort state?"
+      Sum all bar segments for the cohort state you have your mouse over for all
+      days. Divide the bar segment you have your mouse over by that sum.
+      Answers: "What percentage of users does the highlighted bar segment
+      represent over all time for that cohort state?"
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">∑←&nbsp;/&nbsp;∑↔</span>
     <span class="calculations-short-name">"Contribution of past to cumulative sum over time"</span>
     <div class="calculations-description">
-      Sum all bar segments from the cohort state you have your mouse over going back in time to the left, including the one your mouse is over. Answers: "What percentage of users over all time got into the highlighted cohort state before and including the highlighted day?" For the last day this will be 100%.
+      Sum all bar segments from the cohort state you have your mouse over going
+      back in time to the left, including the one your mouse is over. Answers:
+      "What percentage of users over all time got into the highlighted cohort
+      state before and including the highlighted day?" For the last day this
+      will be 100%.
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">∑→&nbsp;/&nbsp;∑↔</span>
     <span class="calculations-short-name">"Contribution of future to cumulative sum over time"</span>
     <div class="calculations-description">
-      Sum all bar segments from the cohort state you have your mouse over going forward in time to the right, including the one your mouse is over. Answers: "What percentage of users over all time got into the highlighted cohort state after and including the highlighted day?" For the first day this will be 100%.
+      Sum all bar segments from the cohort state you have your mouse over going
+      forward in time to the right, including the one your mouse is over.
+      Answers: "What percentage of users over all time got into the highlighted
+      cohort state after and including the highlighted day?" For the first day
+      this will be 100%.
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">X&nbsp;/&nbsp;Max&nbsp;↔</span>
     <span class="calculations-short-name">"Percentage of maximum single day ever"</span>
     <div class="calculations-description">
-      Find the biggest bar segment for the cohort state you have your mouse over for all time. Divide the bar segment you have your mouse over by the the biggest amount. Answers: "How big is this day for users to get into the highlighted cohort state compared to all other days ever?" The biggest day will be 100%.
+      Find the biggest bar segment for the cohort state you have your mouse over
+      for all time. Divide the bar segment you have your mouse over by the the
+      biggest amount. Answers: "How big is this day for users to get into the
+      highlighted cohort state compared to all other days ever?" The biggest day
+      will be 100%.
     </div>
   </div>
   <div class="single-calculation">
     <span class="calculations-formula">1&nbsp;-&nbsp;X&nbsp;/&nbsp;Max&nbsp;↔</span>
     <span class="calculations-short-name">"Delta from maximum single day ever"</span>
     <div class="calculations-description">
-      Find the biggest bar segment for the cohort state you have your mouse over for all time. Divide the bar segment you have your mouse over by the the biggest amount. Subtract that from 100%. Answers: "How much bigger is the biggest day ever for this cohort state compared to this day?" The biggest day will be 0%.
+      Find the biggest bar segment for the cohort state you have your mouse over
+      for all time. Divide the bar segment you have your mouse over by the the
+      biggest amount. Subtract that from 100%. Answers: "How much bigger is the
+      biggest day ever for this cohort state compared to this day?" The biggest
+      day will be 0%.
     </div>
   </div>
 </p>
