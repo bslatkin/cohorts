@@ -76,23 +76,24 @@ function createGroupTypeRadios(groupTypes) {
   // Guess that whichever group type has only one value and that value is
   // empty will be the topline data.
   var checkedType = null;
-  var firstType = null;
   $.each(groupTypes, function(key, value) {
-    if (!firstType) {
-      firstType = key;
-    }
     if (value.length == 1 && value[0] === '') {
       checkedType = key;
     }
   });
 
+  // Sort the group names so they're in alphabetical order.
+  var groupTypesSorted = Object.keys(groupTypes);
+  groupTypesSorted.sort();
+
   // If there is no default type with the top-line then use the first one.
   if (!checkedType) {
-    checkedType = firstType;
+    checkedType = groupTypesSorted[0];
   }
 
   var i = 0;
-  $.each(groupTypes, function(key, value) {
+  $.each(groupTypesSorted, function(index, key) {
+    var value = groupTypes[key];
     var radioId = 'group_type_radio1_' + (i++);
     var useRadio = $('<input type="radio">')
         .addClass('group-type-radio')
@@ -134,6 +135,9 @@ function createGroupValueCheckboxes(groupTypes) {
   if (values.length == 1 && values[0] === '') {
     return;
   }
+
+  // Sort values alphabetically!
+  values.sort();
 
   var valuesHeader = $('<div class="section-header">')
       .text('Included group values');
