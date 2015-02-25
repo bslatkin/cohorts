@@ -64,6 +64,11 @@ function getIncludedSigns() {
 }
 
 
+// Keep track of the last checked state for group values so we can preserve
+// their selection state.
+var LAST_GROUP_VALUES = {};
+
+
 function createGroupTypeRadios(groupTypes) {
   var vizDiv = $('#viz_group_type1');
   vizDiv.empty();
@@ -140,6 +145,8 @@ function createGroupValueCheckboxes(groupTypes) {
       .text('all')
       .click(function() {
         $('.group-value-checkbox').prop('checked', true);
+        // Clear the set of last group values selected.
+        LAST_GROUP_VALUES = {};
         $(document).trigger('cohorts.viz');
       })
       .appendTo(selectionToggle);
@@ -148,6 +155,8 @@ function createGroupValueCheckboxes(groupTypes) {
       .text('none')
       .click(function() {
         $('.group-value-checkbox').prop('checked', false);
+        // Clear the set of last group values selected.
+        LAST_GROUP_VALUES = {};
         $(document).trigger('cohorts.viz');
       })
       .appendTo(selectionToggle);
@@ -172,8 +181,25 @@ function createGroupValueCheckboxes(groupTypes) {
 
   // Register event handlers
   $('.group-value-checkbox').click(function(e) {
+    // When something is explicitly checked or unchecked, preserve its state so
+    // it will be restored if the group type is changed later. This will be
+    // cleared by selecting None or All.
+    var checkbox = $(e.target);
+    LAST_GROUP_VALUES[checkbox.val()] = checkbox.attr('checked') === 'checked';
+
     $(document).trigger('cohorts.viz');
   });
+
+  // Pre-check those group values preserved from before. Any values that were
+  // previously removed will be defaulted to unchecked. Thus, only explicit
+  // checking is preserved.
+  if (Object.keys(LAST_GROUP_VALUES).length > 0) {
+    $('.group-value-checkbox').attr('checked', false);
+
+    $.each(LAST_GROUP_VALUES, function(key, value) {
+      $('.group-value-checkbox[value="' + key + '"]').attr('checked', value);
+    });
+  }
 }
 
 
