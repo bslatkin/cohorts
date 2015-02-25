@@ -448,8 +448,7 @@ function updateInfoPanel(cohort, highlightStateName) {
   var sumHorizontal = 0;
   var maxHorizontal = 0;
   if (!!highlightStateName) {
-    var format = d3.time.format("%m/%d/%y");
-    var highlightedCohortTime = format.parse(cohort);
+    var highlightedCohortTime = parseDate(cohort);
     var allStateBars = $('rect[data-state-name="' + highlightStateName + '"]');
     $.each(allStateBars, function(index, value) {
       var el = $(value);
@@ -457,7 +456,7 @@ function updateInfoPanel(cohort, highlightStateName) {
         // Ignore bars hidden by weekly or monthly grouping.
         return;
       }
-      var cohort = format.parse(el.attr('data-cohort'));
+      var cohort = parseDate(el.attr('data-cohort'));
       var stateCount = parseInt(el.attr('data-state-count'));
       sumHorizontal += stateCount;
       if (cohort <= highlightedCohortTime) {
@@ -551,6 +550,34 @@ function getCohort(cohortDay, cohortsInOrder, period) {
 };
 
 
+var FORMAT_AMERICAN_SHORT = d3.time.format("%m/%d/%y");
+var FORMAT_AMERICAN_LONG = d3.time.format("%m/%d/%Y");
+var FORMAT_ISO_8601 = d3.time.format("%Y-%m-%d");
+
+
+function parseDate(value) {
+  var result = FORMAT_AMERICAN_SHORT.parse(value);
+  if (result) {
+    return result;
+  }
+  result = FORMAT_AMERICAN_LONG.parse(value);
+  if (result) {
+    return result;
+  }
+  result = FORMAT_ISO_8601.parse(value);
+  if (result) {
+    return result;
+  }
+  alert('The data contains bad date values.');
+  throw Exception('The data contains bad date values.');
+}
+
+
+function printDate(value) {
+  return FORMAT_AMERICAN_SHORT(value);
+}
+
+
 function filterData(rows, groupType, groupValues, totalGroupValues,
                     includeStateNames, period, pointType, includedSigns) {
   var positives = includedSigns == 'positive' || includedSigns == 'both';
@@ -582,9 +609,8 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   }
 
   // Extract the cohort days so we can do arbitrary time regroupings.
-  var format = d3.time.format("%m/%d/%y");
   function compareCohorts(a, b) {
-    return d3.ascending(format.parse(a), format.parse(b));
+    return d3.ascending(parseDate(a), parseDate(b));
   }
   var cohortsSet = {};
   $.each(rows, function(index, value) {
@@ -608,11 +634,11 @@ function filterData(rows, groupType, groupValues, totalGroupValues,
   $.each(cohortsWithGaps, function(index, value) {
     if (cohortsInOrder.length > 0) {
       var lastCohortString = cohortsInOrder[cohortsInOrder.length - 1];
-      var lastDate = format.parse(lastCohortString);
-      var nextDate = format.parse(value);
+      var lastDate = parseDate(lastCohortString);
+      var nextDate = parseDate(value);
       while (d3.time.day.offset(lastDate, 1) < nextDate) {
         var fillDate = d3.time.day.offset(lastDate, 1);
-        var cohortString = format(fillDate);
+        var cohortString = printDate(fillDate);
         cohortsInOrder.push(cohortString);
         lastDate = fillDate;
       }
